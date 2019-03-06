@@ -1,5 +1,6 @@
 hellworld/db.sqlite3
 venv
 .idea
-hellworld/__pycache__/
-hellworld/hellworld/__pycache__
+napady.txt
+bluetooth-proximity
+__pycache__/
