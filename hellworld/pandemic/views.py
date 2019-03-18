@@ -1,3 +1,11 @@
-from django.shortcuts import render
+from django.views.generic import FormView
 
-# Create your views here.
+from .forms import CodeSubmitForm
+
+
+class EditorView(FormView):
+    template_name = 'pandemic/editor.html'
+    form_class = CodeSubmitForm
+
+
+
