@@ -1,0 +1,26 @@
+version: '3'
+services:
+  web:
+    build: .
+    image: hellworld
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/hellworld
+    depends_on:
+      - redis
+      - celery
+    environment:
+      - DJANGO_SETTINGS_MODULE=hellworld.settings
+    command: python manage.py runserver 0.0.0.0:8000
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+  celery:
+    build: .
+    depends_on:
+      - redis
+    command: celery -A hellworld worker -l DEBUG -E
+    volumes:
+      - .:/hellworld

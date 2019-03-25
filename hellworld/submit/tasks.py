@@ -1,6 +1,6 @@
 import json
 
-from celery import Task
+from celery.task import Task
 
 from django.db import transaction
 
