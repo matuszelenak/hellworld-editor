@@ -6,13 +6,19 @@ class DiseaseClass(models.Model):
     TYPE_DEGENERATIVE = 1
 
     TYPES = (
-        ('Infectious', TYPE_INFECTIOUS),
-        ('Degenerative', TYPE_DEGENERATIVE)
+        (TYPE_INFECTIOUS, 'Infectious'),
+        (TYPE_DEGENERATIVE, 'Degenerative')
     )
 
     name = models.TextField(null=False)
     description = models.TextField()
     type = models.IntegerField(choices=TYPES)
+
+
+class DiseaseInstance(models.Model):
+    disease = models.ForeignKey('pandemic.DiseaseClass', related_name='instances', on_delete=models.CASCADE)
+    participant = models.ForeignKey('people.Participant', related_name='diseases', on_delete=models.CASCADE)
+    severity = models.IntegerField(null=False, default=1)
 
 
 class DiseaseTransmit(models.Model):

@@ -2,8 +2,8 @@ from django.db import models
 
 
 class Task(models.Model):
-    name = models.TextField(null=False)
-    assignment_text = models.TextField(null=False)
+    name = models.CharField(max_length=100, null=False)
+    assignment = models.FileField(upload_to='tasks', null=True)
     input_path = models.TextField(null=False)
     max_points = models.IntegerField(null=False)
 
@@ -18,28 +18,28 @@ class Submit(models.Model):
     STATUS_RUNTIME_EXCEPTION = 6
 
     STATUS_CHOICES = (
-        ('Waiting', STATUS_WAITING),
-        ('Running', STATUS_RUNNING),
-        ('OK', STATUS_OK),
-        ('WA', STATUS_WA),
-        ('Compilation error', STATUS_COMPILATION_ERROR),
-        ('Segmentation fault', STATUS_SEGFAULT),
-        ('Runtime exception', STATUS_RUNTIME_EXCEPTION)
+        (STATUS_WAITING, 'Waiting'),
+        (STATUS_RUNNING, 'Running'),
+        (STATUS_OK, 'OK'),
+        (STATUS_WA, 'WA'),
+        (STATUS_COMPILATION_ERROR, 'Compilation error'),
+        (STATUS_SEGFAULT, 'Segmentation fault'),
+        (STATUS_RUNTIME_EXCEPTION, 'Runtime exception')
     )
 
     LANGUAGE_PYTHON = 0
     LANGUAGE_CPP = 1
 
     LANGUAGE_CHOICES = (
-        ('Python', LANGUAGE_PYTHON),
-        ('C/C++', LANGUAGE_CPP)
+        (LANGUAGE_PYTHON, 'Python'),
+        (LANGUAGE_CPP, 'C/C++')
     )
     participant = models.ForeignKey('people.Participant', related_name='submits', on_delete=models.CASCADE, null=True)
     task = models.ForeignKey('submit.Task', related_name='submits', on_delete=models.SET_NULL, null=True)
     file = models.FileField(upload_to='submits')
     language = models.IntegerField(choices=LANGUAGE_CHOICES, null=False)
 
-    scoring_task_id = models.CharField(max_length=36, null=True)
+    scoring_task_id = models.CharField(max_length=36, null=True, blank=True)
     status = models.IntegerField(choices=STATUS_CHOICES, null=False, default=STATUS_WAITING)
 
     def run_scoring(self):

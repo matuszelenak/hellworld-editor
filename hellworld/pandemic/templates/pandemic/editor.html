@@ -1,7 +1,21 @@
-<!-- templates/registration/login.html -->
-<h2>Login</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Login</button>
-</form>
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HellWorld editor</title>
+
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+
+    <script type="text/javascript">
+        let logout_link = "{% url 'logout' %}";
+    </script>
+    <script type="text/javascript" src="{% static "js/editor.js" %}"></script>
+</head>
+<body>
+    <div id="editor-container"></div>
+</body>
+</html>

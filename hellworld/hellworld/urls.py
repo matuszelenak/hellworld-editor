@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('editor/', include('pandemic.urls')),
+    path('submit/', include('submit.urls')),
+    path('pandemic/', include('pandemic.urls')),
+    path('people/', include('people.urls'))
 ]

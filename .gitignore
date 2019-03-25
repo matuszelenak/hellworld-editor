@@ -4,3 +4,4 @@ venv
 napady.txt
 bluetooth-proximity
 __pycache__/
+hellworld/staticfiles

@@ -1,3 +1,31 @@
-from django.shortcuts import render
+from django.contrib.auth import authenticate, login, logout
 
-# Create your views here.
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.views import View
+from django.views.generic import FormView
+
+from people.forms import LoginForm
+
+
+class LoginView(FormView):
+    form_class = LoginForm
+    template_name = 'people/login.html'
+
+    def get_success_url(self):
+        return reverse('pandemic:editor_main')
+
+    def form_valid(self, form):
+        user = authenticate(self.request, username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+        if user is not None:
+            login(self.request, user)
+            return super().form_valid(form)
+        else:
+            form.add_error(None, 'Invalid username or password')
+            return self.form_invalid(form)
+
+
+class LogoutView(View):
+    def post(self, request):
+        logout(request)
+        return HttpResponseRedirect(reverse('people:login'))

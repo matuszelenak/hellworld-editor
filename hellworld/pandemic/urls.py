@@ -1,7 +1,10 @@
-from django.urls import path
+from django.conf.urls import url
+from django.contrib.auth.decorators import login_required
 
-from .views import EditorView
+from pandemic.views import EditorView
+
+app_name = 'pandemic'
 
 urlpatterns = [
-    path('submit/', EditorView.as_view(), name='editor_submit')
+    url(r'^main/$', login_required(EditorView.as_view()), name='editor_main'),
 ]
