@@ -4,7 +4,7 @@ from celery import Task
 
 from django.db import transaction
 
-from hellworld.submit.models import Submit, SubmitScore
+from submit.models import Submit, SubmitScore
 
 
 class ScoringTask(Task):

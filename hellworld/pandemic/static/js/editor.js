@@ -8,6 +8,22 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function make_post_request(url, content, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    // send the collected data as JSON
+    xhr.send(JSON.stringify(content));
+
+    xhr.onloadend = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var json = JSON.parse(xhr.responseText);
+            callback(json);
+        }
+    };
+}
+
 var EditorWindow = function (_React$Component) {
     _inherits(EditorWindow, _React$Component);
 
@@ -18,12 +34,18 @@ var EditorWindow = function (_React$Component) {
     }
 
     _createClass(EditorWindow, [{
-        key: "render",
+        key: 'submit_code',
+        value: function submit_code(e) {
+            e.preventDefault();
+            make_post_request(code_submit_url, { "code": "somecodehere", "language": 1, "task": 1 });
+        }
+    }, {
+        key: 'render',
         value: function render() {
             return React.createElement(
-                "p",
-                null,
-                "Hello"
+                'button',
+                { onClick: this.submit_code },
+                'Submit'
             );
         }
     }]);
@@ -41,12 +63,12 @@ var LogoutBtn = function (_React$Component2) {
     }
 
     _createClass(LogoutBtn, [{
-        key: "render",
+        key: 'render',
         value: function render() {
             return React.createElement(
-                "form",
-                { method: "post", action: logout_link },
-                React.createElement("input", { type: "submit", value: "Logout" })
+                'form',
+                { method: 'post', action: logout_link },
+                React.createElement('input', { type: 'submit', value: 'Logout' })
             );
         }
     }]);
@@ -54,8 +76,27 @@ var LogoutBtn = function (_React$Component2) {
     return LogoutBtn;
 }(React.Component);
 
-var Editor = function (_React$Component3) {
-    _inherits(Editor, _React$Component3);
+var TaskViewer = function (_React$Component3) {
+    _inherits(TaskViewer, _React$Component3);
+
+    function TaskViewer() {
+        _classCallCheck(this, TaskViewer);
+
+        return _possibleConstructorReturn(this, (TaskViewer.__proto__ || Object.getPrototypeOf(TaskViewer)).apply(this, arguments));
+    }
+
+    _createClass(TaskViewer, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement('embed', { src: task_pdf_link, type: 'application/pdf', width: '100%', height: '600px' });
+        }
+    }]);
+
+    return TaskViewer;
+}(React.Component);
+
+var Editor = function (_React$Component4) {
+    _inherits(Editor, _React$Component4);
 
     function Editor() {
         _classCallCheck(this, Editor);
@@ -64,16 +105,12 @@ var Editor = function (_React$Component3) {
     }
 
     _createClass(Editor, [{
-        key: "render",
+        key: 'render',
         value: function render() {
             return React.createElement(
-                "div",
+                'div',
                 null,
-                React.createElement(
-                    "p",
-                    null,
-                    "Hello World"
-                ),
+                React.createElement(EditorWindow, null),
                 React.createElement(LogoutBtn, null)
             );
         }

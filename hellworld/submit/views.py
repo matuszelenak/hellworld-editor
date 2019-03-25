@@ -1,8 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.http import FileResponse, Http404, HttpResponse, HttpResponseForbidden, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
 
 from rest_framework.views import APIView
 
@@ -24,10 +23,13 @@ class CodeSubmitAPIView(AuthorizedApiView):
         data = serializer.validated_data
         data['participant'] = request.user
         submit = serializer.create(data)
+        submit.save()
 
-        transaction.on_commit(lambda: submit.run_scoring())
+        # transaction.on_commit(lambda: submit.run_scoring())
 
-        return Response(data={})
+        return JsonResponse(
+            {'submit_id': submit.pk}
+        )
 
 
 class SubmitStatusRequestView(AuthorizedApiView):
@@ -49,8 +51,8 @@ class TaskAssignmentAPIView(AuthorizedApiView):
         if not task.assignment:
             return Http404()
 
-        filename = task.assignment.name.split('/')[-1]
+        # filename = task.assignment.name.split('/')[-1]
         response = HttpResponse(task.assignment, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        # response['Content-Disposition'] = 'attachment; filename=%s' % filename
 
         return response
