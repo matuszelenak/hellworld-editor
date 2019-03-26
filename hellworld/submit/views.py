@@ -25,7 +25,7 @@ class CodeSubmitAPIView(AuthorizedApiView):
         submit = serializer.create(data)
         submit.save()
 
-        # transaction.on_commit(lambda: submit.run_scoring())
+        transaction.on_commit(lambda: submit.run_scoring())
 
         return JsonResponse(
             {'submit_id': submit.pk}
