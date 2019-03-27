@@ -12,7 +12,19 @@ SUBMIT_COOLDOWN_CYCLES = 5
 
 
 def submit_tag_presence(address):
-    requests.post(url=SUBMIT_URL, json={'address': address, 'target': os.environ.get('HELLWORLD_USER_ID', 1)})
+    try:
+        response = requests.post(
+            url=SUBMIT_URL,
+            json={
+                'address': address,
+                'target': os.environ.get('HELLWORLD_TEAM_ID', 1)
+            })
+        if response.status_code == 200:
+            print(response.json())
+            return response.json()['result'] == 'infected'
+    except Exception:
+        pass
+    return False
 
 
 scanner = Scanner()
@@ -28,7 +40,7 @@ while True:
     device_rssi_history = {addr: v for addr, v in device_rssi_history.items() if addr in discovered}
 
     for addr in submission_history.keys():
-        submission_history[addr] = max(submission_his.tory[addr] - 1, 0)
+        submission_history[addr] = max(submission_history[addr] - 1, 0)
 
     for addr, rssi in discovered.items():
 
@@ -48,7 +60,7 @@ while True:
 
         if device_avg_rssi > REQUIRED_AVG_RSSI and submission_history.get(addr, 0) == 0:
             print("Submitting addr {}".format(addr))
-            submit_tag_presence(addr)
-            submission_history[addr] = SUBMIT_COOLDOWN_CYCLES
+            if submit_tag_presence(addr):
+                submission_history[addr] = SUBMIT_COOLDOWN_CYCLES
 
         print("Device %s, RSSI=%d dB" % (addr, rssi))

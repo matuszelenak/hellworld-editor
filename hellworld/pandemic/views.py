@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 
 from pandemic.models import DiseaseInstance, DiseaseTransmit
 from pandemic.serializers import DiseaseInstanceSerializer
-from people.models import BluetoothTag, Participant
+from people.models import BluetoothTag, Participant, Team
 from submit.views import AuthorizedApiView
 
 
@@ -35,22 +35,26 @@ class BluetoothTagSubmitView(View):
         tag = BluetoothTag.objects.select_for_update().filter(address=content['address']).first()
         if not tag:
             raise Http404()
-        target = get_object_or_404(Participant, pk=content['target'])
+        target_team = get_object_or_404(Team, pk=content['target'])
 
-        transmits = DiseaseTransmit.objects.filter(tag=tag)
-        existing_instances = DiseaseInstance.objects.filter(participant=target)
-        for transmit in transmits:
-            instance = existing_instances.filter(disease=transmit.disease)
+        participant = target_team.logged_in
+        if participant:
+            transmits = DiseaseTransmit.objects.filter(tag=tag)
+            existing_instances = DiseaseInstance.objects.filter(participant=participant)
+            for transmit in transmits:
+                instance = existing_instances.filter(disease=transmit.disease)
 
-            if instance.exists():
-                instance.update(severity=max(instance.first().severity, transmit.severity))
-            else:
-                DiseaseInstance.objects.create(
-                    disease=transmit.disease,
-                    participant=target,
-                    severity=transmit.severity
-                )
+                if instance.exists():
+                    instance.update(severity=max(instance.first().severity, transmit.severity))
+                else:
+                    DiseaseInstance.objects.create(
+                        disease=transmit.disease,
+                        participant=participant,
+                        severity=transmit.severity
+                    )
 
-        transmits.delete()
+            transmits.delete()
+            return JsonResponse({'result': 'infected'})
+        else:
+            return JsonResponse({'result': 'dodged'})
 
-        return HttpResponse()

@@ -19,6 +19,9 @@ class LoginView(FormView):
         user = authenticate(self.request, username=form.cleaned_data['username'], password=form.cleaned_data['password'])
         if user is not None:
             login(self.request, user)
+            if user.team:
+                user.team.logged_in = user
+                user.team.save()
             return super().form_valid(form)
         else:
             form.add_error(None, 'Invalid username or password')
@@ -27,5 +30,8 @@ class LoginView(FormView):
 
 class LogoutView(View):
     def post(self, request):
+        if request.user and request.user.team:
+            request.user.team.logged_in = None
+            request.user.team.save()
         logout(request)
         return HttpResponseRedirect(reverse('people:login'))

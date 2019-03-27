@@ -5,6 +5,7 @@ from django.contrib.auth.models import User, PermissionsMixin, AbstractUser
 
 class Team(models.Model):
     name = models.CharField(max_length=40, null=False)
+    logged_in = models.OneToOneField('people.Participant', on_delete=models.SET_NULL, null=True, related_name='+')
 
 
 class Participant(AbstractUser):

@@ -46,6 +46,7 @@ class TaskViewer extends React.Component {
 }
 
 class Editor extends React.Component {
+
     render() {
         return (
             <div>
