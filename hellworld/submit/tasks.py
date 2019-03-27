@@ -1,6 +1,7 @@
 import json
 
 from celery.task import Task
+from django.core.files.base import ContentFile
 
 from django.db import transaction
 
@@ -15,21 +16,29 @@ class ScoringTask(Task):
 
     @transaction.atomic
     def run(self, submit_pk, *args, **kwargs):
-        submit = Submit.objects.get(pk=submit_pk)
+        submit = Submit.objects.select_for_update().get(pk=submit_pk)
         submit.status = Submit.STATUS_RUNNING
 
         points, log_dict = self.score_submit(submit)
 
-        SubmitScore.objects.create(
+        score = SubmitScore.objects.create(
             submit=submit,
-            points=points,
-            log_file=json.dumps(log_dict)
+            points=points
         )
+        score.log_file.save('{}'.format(score.pk), ContentFile(json.dumps(log_dict)))
+        score.save()
+
+        submit.scoring_task_id = None
+        submit.save()
 
 
 class PythonScoringTask(ScoringTask):
-    pass
+    def score_submit(self, submit):
+        submit.status = Submit.STATUS_OK
+        return 1, []
 
 
 class CppScoringTask(ScoringTask):
-    pass
+    def score_submit(self, submit):
+        submit.status = Submit.STATUS_OK
+        return 1, []

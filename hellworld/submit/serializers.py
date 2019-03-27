@@ -8,7 +8,6 @@ class SubmitCreateSerializer(serializers.ModelSerializer):
     code = serializers.CharField(max_length=10000, allow_blank=True)
 
     def create(self, validated_data):
-        validated_data['file'] = ContentFile(validated_data['code'])
         validated_data.pop('code')
         return Submit(
             **validated_data
@@ -21,7 +20,9 @@ class SubmitCreateSerializer(serializers.ModelSerializer):
 
 class SubmitSerializer(serializers.ModelSerializer):
 
+
     class Meta:
         model = Submit
-        fields = ('participant', 'task', 'status')
+        fields = ('participant', 'task', 'status',)
         depth = 2
+

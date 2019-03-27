@@ -1,8 +1,14 @@
-from django.http import JsonResponse
+import json
+
+from django.db import transaction
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, Http404
+from django.shortcuts import get_object_or_404
+from django.views import View
 from django.views.generic import TemplateView
 
-from pandemic.models import DiseaseInstance
+from pandemic.models import DiseaseInstance, DiseaseTransmit
 from pandemic.serializers import DiseaseInstanceSerializer
+from people.models import BluetoothTag, Participant
 from submit.views import AuthorizedApiView
 
 
@@ -16,3 +22,35 @@ class ActiveDiseaseInstancesView(AuthorizedApiView):
         serializer = DiseaseInstanceSerializer(instances, many=True)
 
         return JsonResponse(serializer.data)
+
+
+class BluetoothTagSubmitView(View):
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        content = json.loads(request.body)
+        if not ('address' in content and 'target' in content):
+            return HttpResponseBadRequest()
+
+        tag = BluetoothTag.objects.select_for_update().filter(address=content['address']).first()
+        if not tag:
+            raise Http404()
+        target = get_object_or_404(Participant, pk=content['target'])
+
+        transmits = DiseaseTransmit.objects.filter(tag=tag)
+        existing_instances = DiseaseInstance.objects.filter(participant=target)
+        for transmit in transmits:
+            instance = existing_instances.filter(disease=transmit.disease)
+
+            if instance.exists():
+                instance.update(severity=max(instance.first().severity, transmit.severity))
+            else:
+                DiseaseInstance.objects.create(
+                    disease=transmit.disease,
+                    participant=target,
+                    severity=transmit.severity
+                )
+
+        transmits.delete()
+
+        return HttpResponse()

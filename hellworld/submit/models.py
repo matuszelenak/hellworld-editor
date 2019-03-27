@@ -34,6 +34,12 @@ class Submit(models.Model):
         (LANGUAGE_PYTHON, 'Python'),
         (LANGUAGE_CPP, 'C/C++')
     )
+
+    LANGUAGE_EXTENSIONS = {
+        LANGUAGE_PYTHON: '.py',
+        LANGUAGE_CPP: '.cpp'
+    }
+
     participant = models.ForeignKey('people.Participant', related_name='submits', on_delete=models.CASCADE, null=True)
     task = models.ForeignKey('submit.Task', related_name='submits', on_delete=models.SET_NULL, null=True)
     file = models.FileField(upload_to='submits')
@@ -51,6 +57,7 @@ class Submit(models.Model):
 
         self.status = self.STATUS_WAITING
         self.scoring_task_id = scoring_task_cls().delay(self.pk).task_id
+        self.save()
 
 
 class SubmitScore(models.Model):
@@ -58,3 +65,4 @@ class SubmitScore(models.Model):
     submit = models.ForeignKey('submit.Submit', related_name='scores', on_delete=models.CASCADE)
     log_file = models.FileField(upload_to='scoring_logs')
     points = models.IntegerField(default=0)
+    date_scored = models.DateTimeField(auto_now_add=True)

@@ -25,7 +25,7 @@ SECRET_KEY = 'y0fv)2+iyhsmt!qedm)7^%i*pnvi38v$4fsafdh+2kt3i0p-ux'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'hellworld.top']
 
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
