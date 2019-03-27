@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.base import ContentFile
 from django.db import transaction
@@ -27,7 +29,7 @@ class CodeSubmitAPIView(AuthorizedApiView):
         submit = serializer.create(data)
 
         submit.file.save('{id}{ext}'.format(
-            id=submit.pk,
+            id=str(uuid.uuid4()),
             ext=Submit.LANGUAGE_EXTENSIONS[submit.language]
         ), ContentFile(code))
         submit.save()

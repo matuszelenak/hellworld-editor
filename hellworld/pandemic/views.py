@@ -1,14 +1,14 @@
 import json
 
 from django.db import transaction
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, Http404
+from django.http import JsonResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView
 
 from pandemic.models import DiseaseInstance, DiseaseTransmit
 from pandemic.serializers import DiseaseInstanceSerializer
-from people.models import BluetoothTag, Participant, Team
+from people.models import BluetoothTag, Team
 from submit.views import AuthorizedApiView
 
 

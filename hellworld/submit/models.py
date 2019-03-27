@@ -4,8 +4,8 @@ from django.db import models
 class Task(models.Model):
     name = models.CharField(max_length=100, null=False)
     assignment = models.FileField(upload_to='tasks', null=True)
-    input_path = models.TextField(null=False)
     max_points = models.IntegerField(null=False)
+    time_limit = models.IntegerField(default=5000)
 
 
 class Submit(models.Model):
@@ -14,8 +14,8 @@ class Submit(models.Model):
     STATUS_OK = 2
     STATUS_WA = 3
     STATUS_COMPILATION_ERROR = 4
-    STATUS_SEGFAULT = 5
-    STATUS_RUNTIME_EXCEPTION = 6
+    STATUS_RUNTIME_EXCEPTION = 5
+    STATUS_TIME_LIMIT_EXCEEDED = 6
 
     STATUS_CHOICES = (
         (STATUS_WAITING, 'Waiting'),
@@ -23,8 +23,8 @@ class Submit(models.Model):
         (STATUS_OK, 'OK'),
         (STATUS_WA, 'WA'),
         (STATUS_COMPILATION_ERROR, 'Compilation error'),
-        (STATUS_SEGFAULT, 'Segmentation fault'),
-        (STATUS_RUNTIME_EXCEPTION, 'Runtime exception')
+        (STATUS_RUNTIME_EXCEPTION, 'Runtime exception'),
+        (STATUS_TIME_LIMIT_EXCEEDED, 'Time limit exceeded')
     )
 
     LANGUAGE_PYTHON = 0
@@ -63,6 +63,7 @@ class Submit(models.Model):
 class SubmitScore(models.Model):
 
     submit = models.ForeignKey('submit.Submit', related_name='scores', on_delete=models.CASCADE)
+    compilation_message = models.TextField()
     log_file = models.FileField(upload_to='scoring_logs')
     points = models.IntegerField(default=0)
     date_scored = models.DateTimeField(auto_now_add=True)
