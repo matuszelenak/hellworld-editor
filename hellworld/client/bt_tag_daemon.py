@@ -7,7 +7,7 @@ SUBMIT_URL = 'http://hellworld.top:8000/pandemic/bluetooth_tag/'
 
 DEFAULT_RSSI = -100
 HISTORY_LENGTH = 3
-REQUIRED_AVG_RSSI = -90
+REQUIRED_AVG_RSSI = -80
 SUBMIT_COOLDOWN_CYCLES = 5
 
 
@@ -64,3 +64,4 @@ while True:
                 submission_history[addr] = SUBMIT_COOLDOWN_CYCLES
 
         print("Device %s, RSSI=%d dB" % (addr, rssi))
+    print()

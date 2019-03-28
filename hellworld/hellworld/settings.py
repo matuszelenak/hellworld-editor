@@ -165,3 +165,5 @@ MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 COMPILED_BINARIES_PATH = os.path.join(MEDIA_ROOT, 'compiled')
+
+TASK_ROOT = os.path.join(MEDIA_ROOT, 'tasks')

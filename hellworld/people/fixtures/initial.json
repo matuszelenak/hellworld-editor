@@ -1,0 +1,44 @@
+[
+  {
+    "model": "people.bluetoothtag",
+    "pk": 1,
+    "fields": {
+      "address": "ff:ff:50:01:06:65"
+    }
+  },
+  {
+    "model": "people.bluetoothtag",
+    "pk": 2,
+    "fields": {
+      "address": "ff:ff:30:02:2e:6a"
+    }
+  },
+  {
+    "model": "people.bluetoothtag",
+    "pk": 3,
+    "fields": {
+      "address": "ff:ff:80:02:3d:da"
+    }
+  },
+  {
+    "model": "people.bluetoothtag",
+    "pk": 4,
+    "fields": {
+      "address": "ff:ff:a0:06:09:91"
+    }
+  },
+  {
+    "model": "people.bluetoothtag",
+    "pk": 5,
+    "fields": {
+      "address": "ff:ff:60:01:b1:85"
+    }
+  },
+  {
+    "model": "people.bluetoothtag",
+    "pk": 6,
+    "fields": {
+      "address": "ff:ff:50:01:07:15"
+    }
+  }
+]

@@ -15,7 +15,7 @@ class Participant(AbstractUser):
 
 class BluetoothTag(models.Model):
     address = models.TextField(null=False)
-    team = models.ForeignKey('people.Team', related_name='tags', on_delete=models.CASCADE)
+    team = models.ForeignKey('people.Team', related_name='tags', on_delete=models.CASCADE, null=True)
 
 
 class MedicineSupply(models.Model):
