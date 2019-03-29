@@ -36,7 +36,17 @@ class ScoringTask(Task):
 
             start = datetime.datetime.now()
             try:
-                p = subprocess.check_output(base_command, input=data, stderr=subprocess.STDOUT, timeout=submit.task.time_limit / 1000)
+                run_command = 'ulimit -v {mem} -n 0 && {base}'.format(
+                    mem=10,
+                    base=base_command
+                )
+                p = subprocess.check_output([run_command],
+                                            input=data,
+                                            stderr=subprocess.STDOUT,
+                                            timeout=submit.task.time_limit / 1000,
+                                            shell=True,
+                                            executable='/bin/bash'
+                                            )
             except subprocess.CalledProcessError:
                 log.append({
                     'input': infile_path,
@@ -57,6 +67,7 @@ class ScoringTask(Task):
                 return log
 
             if p != output_data:
+                print(p)
                 log.append({
                     'input': infile_path,
                     'elapsed': int((datetime.datetime.now() - start).total_seconds() * 1000),
@@ -106,7 +117,7 @@ class PythonScoringTask(ScoringTask):
         }
 
     def get_base_execution_command(self, exec_path):
-        return ['python', exec_path]
+        return 'python {}'.format(exec_path)
 
 
 class CppScoringTask(ScoringTask):
@@ -132,4 +143,4 @@ class CppScoringTask(ScoringTask):
         }
 
     def get_base_execution_command(self, exec_path):
-        return [exec_path]
+        return str(exec_path)

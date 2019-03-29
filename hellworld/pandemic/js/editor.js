@@ -21,8 +21,7 @@ class EditorWindow extends React.Component {
 
     submit_code(e) {
         e.preventDefault();
-        //make_post_request(code_submit_url, {"code": "#include <cstdio>\n int main(){printf(\"47\"); char a[1];  return 0;}", "language": 1, "task": 1})
-        make_post_request(code_submit_url, {"code": "c = 0\nfor _ in range(10000):\n\tfor _ in range(1000):\n\t\tc+=1", "language": 0, "task": 1})
+        make_post_request(code_submit_url, {"code": "a = [42 for _ in range(100000)\nprint(47, end='')]", "language": 0, "task": 1})
     }
 
     render() {

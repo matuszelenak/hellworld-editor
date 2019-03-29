@@ -6,6 +6,7 @@ class Task(models.Model):
     assignment = models.FileField(upload_to='tasks', null=True)
     max_points = models.IntegerField(null=False)
     time_limit = models.IntegerField(default=5000)
+    memory_limit = models.IntegerField(default=5000)
 
 
 class Submit(models.Model):

@@ -2,7 +2,7 @@ FROM python:3.6-alpine3.7
 
 ENV PYTHONUNBUFFERED=0
 
-RUN apk add --no-cache --virtual build-essentials  gcc g++ make sqlite
+RUN apk add --no-cache --virtual build-essentials  gcc g++ make sqlite bash
 
 RUN mkdir /hellworld
 
