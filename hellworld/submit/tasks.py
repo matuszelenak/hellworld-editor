@@ -48,6 +48,7 @@ class ScoringTask(Task):
                                             executable='/bin/bash'
                                             )
             except subprocess.CalledProcessError:
+                # Runtime exception
                 log.append({
                     'input': infile_path,
                     'elapsed': int((datetime.datetime.now() - start).total_seconds() * 1000),
@@ -55,9 +56,8 @@ class ScoringTask(Task):
                 })
                 submit.status = Submit.STATUS_RUNTIME_EXCEPTION
                 return log
-                # Runtime exception
             except subprocess.TimeoutExpired:
-                # TLE
+                # Time limit exceeded
                 log.append({
                     'input': infile_path,
                     'elapsed': submit.task.time_limit,
@@ -67,6 +67,7 @@ class ScoringTask(Task):
                 return log
 
             if p != output_data:
+                # Wrong answer
                 print(p)
                 log.append({
                     'input': infile_path,
@@ -76,6 +77,7 @@ class ScoringTask(Task):
                 submit.status = Submit.STATUS_WA
                 return log
             else:
+                # OK
                 log.append({
                     'input': infile_path,
                     'elapsed': int((datetime.datetime.now() - start).total_seconds() * 1000),

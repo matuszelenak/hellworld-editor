@@ -3,6 +3,7 @@ from bluepy.btle import Scanner
 import requests
 import os
 
+QUERY_URL = 'http://hellworld.top:8000/people/tags'
 SUBMIT_URL = 'http://hellworld.top:8000/pandemic/bluetooth_tag/'
 
 DEFAULT_RSSI = -100
@@ -20,26 +21,35 @@ def submit_tag_presence(address):
                 'target': os.environ.get('HELLWORLD_TEAM_ID', 1)
             })
         if response.status_code == 200:
-            print(response.json())
             return response.json()['result'] == 'infected'
     except Exception:
         pass
     return False
 
 
+def get_registered_tags():
+    try:
+        return requests.get(QUERY_URL).json()
+    except Exception:
+        pass
+    return []
+
+
 scanner = Scanner()
 device_rssi_history = {}
 submission_history = {}
 
+registered_tags = get_registered_tags()
+
 while True:
     devices = scanner.scan(5.0)
 
-    discovered = {dev.addr: dev.rssi for dev in devices}
+    discovered = {dev.addr: dev.rssi for dev in devices if dev.addr in registered_tags}
 
     # If a device wasn't found, its history is erased
     device_rssi_history = {addr: v for addr, v in device_rssi_history.items() if addr in discovered}
 
-    for addr in submission_history.keys():
+    for addr in submission_history:
         submission_history[addr] = max(submission_history[addr] - 1, 0)
 
     for addr, rssi in discovered.items():

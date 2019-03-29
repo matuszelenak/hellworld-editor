@@ -1,11 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views import View
 from django.views.generic import FormView
 
 from people.forms import LoginForm
+from people.models import BluetoothTag
 
 
 class LoginView(FormView):
@@ -35,3 +36,9 @@ class LogoutView(View):
             request.user.team.save()
         logout(request)
         return HttpResponseRedirect(reverse('people:login'))
+
+
+class BluetoothTagList(View):
+    def get(self, request):
+        addresses = list(BluetoothTag.objects.values_list('address', flat=True))
+        return JsonResponse(addresses, safe=False)
