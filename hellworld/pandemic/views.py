@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 from pandemic.models import DiseaseInstance, DiseaseTransmit
 from pandemic.serializers import DiseaseInstanceSerializer
 from people.models import BluetoothTag, Team
+from submit.models import Submit
 from submit.views import AuthorizedApiView
 
 
@@ -16,12 +17,24 @@ class EditorView(TemplateView):
     template_name = "pandemic/editor.html"
 
 
-class ActiveDiseaseInstancesView(AuthorizedApiView):
+class CompetitionRules(View):
+    def get(self, request, *args, **kwargs):
+
+        data = {
+            'languages': {
+                k: v for v, k in Submit.LANGUAGE_CHOICES
+            }
+        }
+
+        return JsonResponse(data)
+
+
+class ActiveDiseaseInstancesView(View):
     def get(self, request, *args, **kwargs):
         instances = DiseaseInstance.objects.select_related('disease', 'participant').filter(participant=request.user)
         serializer = DiseaseInstanceSerializer(instances, many=True)
 
-        return JsonResponse(serializer.data)
+        return JsonResponse(serializer.data, safe=False)
 
 
 class BluetoothTagSubmitView(View):

@@ -10,4 +10,4 @@ from submit.models import Task
 @receiver(post_save, sender=Task)
 def generate_test_folders(sender, instance, *args, **kwargs):
     if kwargs['created']:
-        os.mkdir(os.path.join(settings.TASK_ROOT, 'tests', str(instance.pk)))
+        os.mkdir(os.path.join(settings.TASK_ROOT, str(instance.pk)))

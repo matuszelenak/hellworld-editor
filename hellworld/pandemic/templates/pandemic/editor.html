@@ -14,6 +14,9 @@
         let logout_link = "{% url 'people:logout' %}";
         let task_pdf_link = "{% url 'submit:task_assignment' 1 %}";
         let code_submit_url = "{% url 'submit:code_submit' %}";
+        let submit_status_url = "{% url 'submit:submit_status' 4247 %}";
+        let active_diseases_url = "{% url 'pandemic:active_diseases' %}";
+        let rules_url = "{% url 'pandemic:rules' %}";
         let csrftoken = "{{ csrf_token }}";
     </script>
     <script type="text/javascript" src="{% static "js/editor.js" %}"></script>

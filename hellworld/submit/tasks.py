@@ -26,36 +26,40 @@ class ScoringTask(Task):
         base_command = self.get_base_execution_command(exec_path)
 
         log = []
+        points = 0
 
-        inputs_path = os.path.join(settings.MEDIA_ROOT, 'tasks', str(submit.task.pk), 'inputs')
-        outputs_path = os.path.join(settings.MEDIA_ROOT, 'tasks', str(submit.task.pk), 'outputs')
-        for infile_path in os.listdir(inputs_path):
-            data = open(os.path.join(inputs_path, infile_path), 'rb').read()
-            outfile_path = os.path.join(outputs_path, os.path.splitext(infile_path)[0] + '.out')
-            output_data = open(outfile_path, 'rb').read().rstrip('\n'.encode('utf8'))
+        inputs_path = os.path.join(settings.TASK_ROOT, str(submit.task.pk))
+        print(os.path.join(inputs_path, 'points'))
+        point_dict = json.load(open(os.path.join(inputs_path, 'points')))
+
+        for infile_path in sorted([x for x in os.listdir(inputs_path) if os.path.splitext(x)[-1] == '.in']):
+            input_data = open(os.path.join(inputs_path, infile_path), 'rb').read()
+            output_data = open(os.path.join(inputs_path, os.path.splitext(infile_path)[0] + '.out'), 'rb').read()[:-1]
 
             start = datetime.datetime.now()
             try:
-                run_command = 'ulimit -v {mem} -n 0 && {base}'.format(
-                    mem=10,
+                run_command = 'ulimit -v {mem} && {base}'.format(
+                    mem=submit.task.memory_limit,
                     base=base_command
                 )
+                print(run_command)
                 p = subprocess.check_output([run_command],
-                                            input=data,
+                                            input=input_data,
                                             stderr=subprocess.STDOUT,
                                             timeout=submit.task.time_limit / 1000,
                                             shell=True,
                                             executable='/bin/bash'
                                             )
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as err:
                 # Runtime exception
+                print(err)
                 log.append({
                     'input': infile_path,
                     'elapsed': int((datetime.datetime.now() - start).total_seconds() * 1000),
                     'status': 'EXC'
                 })
                 submit.status = Submit.STATUS_RUNTIME_EXCEPTION
-                return log
+                return log, points
             except subprocess.TimeoutExpired:
                 # Time limit exceeded
                 log.append({
@@ -64,10 +68,11 @@ class ScoringTask(Task):
                     'status': 'TLE'
                 })
                 submit.status = Submit.STATUS_TIME_LIMIT_EXCEEDED
-                return log
+                return log, points
 
             if p != output_data:
                 # Wrong answer
+                print(output_data)
                 print(p)
                 log.append({
                     'input': infile_path,
@@ -75,7 +80,7 @@ class ScoringTask(Task):
                     'status': 'WA'
                 })
                 submit.status = Submit.STATUS_WA
-                return log
+                return log, points
             else:
                 # OK
                 log.append({
@@ -83,8 +88,11 @@ class ScoringTask(Task):
                     'elapsed': int((datetime.datetime.now() - start).total_seconds() * 1000),
                     'status': 'OK'
                 })
+                print(infile_path, point_dict)
+                points += point_dict.get(infile_path, 0)
+
         submit.status = Submit.STATUS_OK
-        return log
+        return log, points
 
     @transaction.atomic
     def run(self, submit_pk, *args, **kwargs):
@@ -95,13 +103,14 @@ class ScoringTask(Task):
         log_dict = []
         if compilation['code'] != 0:
             submit.status = Submit.STATUS_COMPILATION_ERROR
+            points = 0
         else:
-            log_dict = self.evaluate(submit, compilation['exec_path'])
+            log_dict, points = self.evaluate(submit, compilation['exec_path'])
 
         score = SubmitScore.objects.create(
             compilation_message=compilation['compilation_message'],
             submit=submit,
-            points=0
+            points=points
         )
         score.log_file.save('{}'.format(score.pk), ContentFile(json.dumps(log_dict)))
         score.save()
