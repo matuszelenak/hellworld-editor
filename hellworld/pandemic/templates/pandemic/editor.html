@@ -83,6 +83,7 @@ $( document ).ready(function() {
 
     function setCursor(element){
         $('#editor-window').find('.editor-char').removeAttr("style");
+        $('#editor-window').find('.editor-sentinel-char').removeAttr("style");
         editor.cursored_element = element;
     }
 
@@ -99,7 +100,7 @@ $( document ).ready(function() {
             this.html = $('<div/>')
                 .addClass('editor-row')
                 .attr('tabindex', "0")
-                .keydown(this.handleKeyDown.bind(this));
+                .keydown(this.handleKeyDown.bind(this))
 
             this.content = content.split('');
             this.buildCharacters();
@@ -115,6 +116,13 @@ $( document ).ready(function() {
                         .click(this.handleCharClick)
                 }
             );
+            this.characters.push(
+                $('<div/>')
+                    .addClass('editor-sentinel-char')
+                    .html(' ')
+                    .data('position', this.characters.length)
+                    .click(this.handleCharClick)
+            );
             this.html.empty().append(this.characters);
         }
 
@@ -129,7 +137,7 @@ $( document ).ready(function() {
         }
 
         getContent(){
-            return this.characters.reduce(
+            return this.characters.filter((x) => x.hasClass('editor-char')).reduce(
                 (acc, char_el) => {
                     return acc + char_el.text()
                 }, ""
@@ -157,6 +165,16 @@ $( document ).ready(function() {
                     }
                     break
                 }
+                case 37: {
+                    this.cursor_position = Math.max(this.cursor_position - 1, 0);
+                    setCursor(this.characters[this.cursor_position]);
+                    break
+                }
+                case 39: {
+                    this.cursor_position = Math.min(this.cursor_position + 1, this.content.length);
+                    setCursor(this.characters[this.cursor_position]);
+                    break
+                }
                 default: {
                     if (non_printable.includes(e.keyCode)) break;
 
@@ -169,9 +187,9 @@ $( document ).ready(function() {
         }
 
         handleCharClick(e){
+            e.preventDefault();
             this.cursor_position = $(event.currentTarget).data('position');
             setCursor(this.characters[this.cursor_position]);
-            console.log(this.cursor_position);
         }
     }
 
@@ -188,7 +206,8 @@ $( document ).ready(function() {
 
             this.cursor_blink = setInterval(() => {
                 if (editor.cursored_element){
-                    if (editor.cursored_element.attr('style') !== 'border-style: solid;'){
+                    if (!editor.cursored_element.attr('style')){
+                        editor.cursored_element.css('margin-left', '0px');
                         editor.cursored_element.css('border-style', 'solid')
                     } else {
                         editor.cursored_element.removeAttr("style");
@@ -318,7 +337,7 @@ $( document ).ready(function() {
             getJson("{% url 'pandemic:rules' %}", (data) => {this.rules = data});
         }
     }
-    let non_printable = [16, 17, 18, 20, 46, 9];
+    let non_printable = [16, 17, 18, 20, 46, 9, 38, 40];
     let editor = new Editor();
 });
 </script>

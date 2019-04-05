@@ -1,13 +1,25 @@
 .editor-row {
+    position: relative;
     margin-bottom: 5px;
     font-family: "Courier New", Courier, monospace;
-    background-color: lightgray;
+    background-color: red;
 }
 
 .editor-char {
+    position: relative;
     font-size: 20px;
     display: inline;
     padding: 5px;
     border-width: 0 0 0 2px;
     border-color: black;
+    margin-left: 2px;
+}
+
+.editor-sentinel-char {
+    font-size: 20px;
+    padding: 5px;
+    display: inline;
+    border-width: 0 0 0 2px;
+    border-color: black;
+    margin-left: 2px;
 }
