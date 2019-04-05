@@ -1,9 +1,13 @@
 .editor-row {
-    background: red;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
+    font-family: "Courier New", Courier, monospace;
+    background-color: lightgray;
 }
 
 .editor-char {
+    font-size: 20px;
     display: inline;
-    margin-right: 10px;
+    padding: 5px;
+    border-width: 0 0 0 2px;
+    border-color: black;
 }

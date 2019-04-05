@@ -16,6 +16,15 @@ from submit.views import AuthorizedApiView
 class EditorView(TemplateView):
     template_name = "pandemic/editor.html"
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data.update(
+            {
+                'submit_cls': Submit
+            }
+        )
+        return data
+
 
 class CompetitionRules(View):
     def get(self, request, *args, **kwargs):
