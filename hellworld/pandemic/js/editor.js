@@ -1,14 +1,83 @@
 'use strict';
 
+class EditorWindowCharacter extends React.Component {
+    constructor(props) {
+        super(props);
+        console.log(this.props.value);
+        this.state = {value: this.props.value, parent_row: this.props.parent_row};
+        this.handleMouseDown = this.handleMouseDown.bind(this);
+    }
+
+    handleMouseDown(e){
+        console.log(this.props.index);
+        this.state.parent_row.changeCursorPosition(this.props.index);
+    }
+
+    render() {
+        return <div className='editor-char' onClick={this.handleMouseDown}>{this.state.value}{this.props.index} </div>
+    }
+}
+
+class EditorWindowRow extends React.Component {
+   constructor(props) {
+        super(props);
+        this.state = {character_values: this.props.value.split('')};
+        this.handleKeyPress = this.handleKeyPress.bind(this);
+        this.changeCursorPosition = this.changeCursorPosition.bind(this);
+        this.cursor_position = 0;
+    }
+
+    changeCursorPosition(clicked_child_id){
+       ///this.cursor_position = this.characters.findIndex((ch) => ch.props.id === clicked_child_id);
+        this.cursor_position = clicked_child_id;
+        console.log(this.cursor_position);
+    }
+
+    handleKeyPress(e){
+       if (e.keyCode !== 13 && e.key !== 8){
+           let character_values = [...this.state.character_values];
+           character_values.splice(this.cursor_position, 0, e.key);
+           this.setState({character_values: character_values});
+           console.log(this.state);
+       }
+    }
+
+    componentDidMount(){
+        document.addEventListener("keydown", this.handleKeyPress, false);
+    }
+
+    componentWillUnmount(){
+        document.removeEventListener("keydown", this.handleKeyPress, false);
+    }
+
+    getContent(){
+       return this.state.character_values.reduce((acc, c) => {return acc + c}, "")
+    }
+
+    render() {
+        return (
+            <div className="editor-row">{
+                this.state.character_values.map(
+            (c, i) => {return <EditorWindowCharacter index={i} value={c} parent_row={this}/>}
+                )
+            }</div>
+        )
+    }
+}
+
 class EditorWindow extends React.Component {
     constructor(props) {
         super(props);
-        console.log(this.props);
-        this.state = {code_value: '', language: 0};
+        this.state = {code_value: '', language: 0, row_values: ['Hello World', 'Please work']};
+        this.rows = [];
 
         this.submitCode = this.submitCode.bind(this);
         this.handleCodeChange = this.handleCodeChange.bind(this);
         this.handleLanguageChange = this.handleLanguageChange.bind(this);
+    }
+
+    getContent(){
+        return this.rows.reduce((acc, r) => {return acc + '\n'+ r.getContent()}, "")
     }
 
     submitCode(e) {
@@ -28,13 +97,18 @@ class EditorWindow extends React.Component {
         let language_options = Object.entries(this.props.languages).map(
             ([key, value]) => <option value={value}>{key}</option>
         );
-
+        this.rows = this.state.row_values.map(
+            (r) => <EditorWindowRow value={r}/>
+        );
         return (
             <div>
                 <select onChange={this.handleLanguageChange}>
                     {language_options}
                 </select>
                 <textarea onChange={this.handleCodeChange}>a</textarea>
+                <div>
+                    {this.rows}
+                </div>
                 <button onClick={this.submitCode}>Submit</button>
             </div>
         );
@@ -55,15 +129,37 @@ class TaskViewer extends React.Component {
     }
 }
 
+class SubmitList extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {submits: this.props.submits};
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.setState({ submits: nextProps.submits});
+    }
+
+    render() {
+        let submits = this.state.submits.map(
+            (submit) => <div>{submit.id}: {submit.status}</div>
+        );
+        return (<div>{submits}</div>)
+    }
+}
+
 class Editor extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {active_diseases: [], rules: {languages: {}}};
+        this.state = {submits: [], active_diseases: [], rules: {languages: {}}};
 
         this.updateRules = this.updateRules.bind(this);
         this.submitCode = this.submitCode.bind(this);
         this.pollSubmitResult = this.pollSubmitResult.bind(this);
 
+    }
+
+    handleKeyPress(e){
+        console.log(e)
     }
 
     pollSubmitResult(id) {
@@ -75,7 +171,13 @@ class Editor extends React.Component {
             .then(data => {
                 if (data.status > 1){
                     clearInterval(this.submit_result_timer);
-                    //TODO add submit results to some list
+                    let submits_copy = [...this.state.submits];
+                    let submit_index = submits_copy.findIndex(x => x.id === id);
+                    let submit = this.state.submits[submit_index];
+                    submit.status = data.status;
+                    this.setState({
+                        submits: submits_copy
+                    })
                 }
             })
     }
@@ -100,6 +202,9 @@ class Editor extends React.Component {
                     () => this.pollSubmitResult(data.submit_id),
                     2000
                 );
+                this.setState({
+                    submits: [{id: data.submit_id, status: 'Waiting'}, ...this.state.submits]
+                })
             });
     }
 
@@ -131,7 +236,7 @@ class Editor extends React.Component {
         this.updateRules();
         this.rule_update_timer = setInterval(
             () => this.updateRules(),
-            20000
+            2000000
         )
     }
 
@@ -144,6 +249,7 @@ class Editor extends React.Component {
         return (
             <div>
                 <EditorWindow languages={this.state.rules.languages} parent={this}/>
+                <SubmitList submits={this.state.submits} />
                 <LogoutBtn/>
             </div>
         );

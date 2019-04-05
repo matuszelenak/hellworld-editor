@@ -6,9 +6,9 @@
     <meta charset="UTF-8">
     <title>HellWorld editor</title>
 
+    <link rel="stylesheet" type="text/css" href="{% static "pandemic/editor_style.css" %}">
+
     <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
 
     <script type="text/javascript">
         let logout_link = "{% url 'people:logout' %}";
@@ -19,9 +19,81 @@
         let rules_url = "{% url 'pandemic:rules' %}";
         let csrftoken = "{{ csrf_token }}";
     </script>
-    <script type="text/javascript" src="{% static "js/editor.js" %}"></script>
 </head>
 <body>
-    <div id="editor-container"></div>
+    <div id="editor-container">
+
+        <div id="editor-window">
+        </div>
+    </div>
 </body>
+<script type="application/javascript">
+$( document ).ready(function() {
+    function get(url, callback){
+
+    }
+
+    function post(url, callback){
+
+    }
+
+    class EditorRow {
+        constructor(content, pos){
+            this.content = content.split('');
+            this.cursor_position = 0;
+            this.html = $('<div/>')
+                .addClass('editor-row')
+                .data('position', pos)
+                .attr('tabindex', "0")
+                .keydown(this.handleKeyDown.bind(this));
+            this.buildRow();
+        }
+
+        buildRow(){
+            this.characters = this.content.map(
+                (char, i) => {
+                    return $('<div/>')
+                        .addClass('editor-char')
+                        .html(char)
+                        .click(this.handleCharClick.bind(this))
+                        .data('position', i);
+                }
+            );
+            this.html.empty().append(...this.characters)
+        }
+
+        handleKeyDown(e){
+            if (e.keyCode !== 13 && e.key !== 8){
+                this.content.splice(this.cursor_position, 0, e.key);
+                this.buildRow()
+            }
+        }
+
+        handleCharClick(e){
+            this.cursor_position = $(event.currentTarget).data('position');
+            console.log(this.cursor_position);
+        }
+    }
+
+    class EditorWindow {
+        constructor(content){
+            this.content = content;
+            this.rows = content.split('\n').map(
+                (c, i) => {
+                    return new EditorRow(c, i)
+                }
+            );
+            $('#editor-window').append(...this.rows.map((x) => x.html));
+        }
+    }
+
+    class Editor {
+        constructor(){
+
+        }
+    }
+
+    let editor = new EditorWindow('Hello World\nPlease work');
+});
+</script>
 </html>

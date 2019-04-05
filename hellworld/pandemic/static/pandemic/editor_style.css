@@ -1,0 +1,9 @@
+.editor-row {
+    background: red;
+    margin-bottom: 10px;
+}
+
+.editor-char {
+    display: inline;
+    margin-right: 10px;
+}
