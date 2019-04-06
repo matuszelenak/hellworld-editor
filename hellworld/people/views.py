@@ -3,10 +3,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views import View
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 
 from people.forms import LoginForm
-from people.models import BluetoothTag
+from people.models import BluetoothTag, Team
+from submit.models import Task, SubmitScore
 
 
 class LoginView(FormView):
@@ -42,3 +43,22 @@ class BluetoothTagList(View):
     def get(self, request):
         addresses = list(BluetoothTag.objects.values_list('address', flat=True))
         return JsonResponse(addresses, safe=False)
+
+
+class ScoreboardView(TemplateView):
+    template_name = 'people/scoreboard.html'
+
+    def get_context_data(self, **kwargs):
+        teams = Team.objects.all()
+        data = super().get_context_data(**kwargs)
+        data['team_scores'] = {}
+        for team in teams:
+            team_points = 0
+            for task in Task.objects.all():
+                best_task_score = SubmitScore.objects.filter(
+                    submit__participant__team=team,
+                    submit__task=task).order_by('-points').first()
+                if best_task_score:
+                    team_points += best_task_score.points
+            data['team_scores'][team.name] = team_points
+        return data

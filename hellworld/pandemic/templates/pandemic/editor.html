@@ -7,18 +7,12 @@
     <title>HellWorld editor</title>
 
     <link rel="stylesheet" type="text/css" href="{% static "pandemic/editor_style.css" %}">
-    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css" />
-     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-
-    <!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-    <!-- Popper JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-
-    <!-- Latest compiled JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link href="{% static "pandemic/jquery-ui.css" %}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{% static "pandemic/bootstrap.min.css" %}">
+    <script src="{% static "pandemic/jquery.min.js" %}"></script>
+    <script src="{% static "pandemic/popper.min.js" %}"></script>
+    <script src="{% static "pandemic/bootstrap.min.js" %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.1.1/howler.min.js"></script>
     <script type="text/javascript">
         let logout_link = "{% url 'people:logout' %}";
         let task_pdf_link = "{% url 'submit:task_assignment' 1 %}";
@@ -26,19 +20,48 @@
         let submit_status_url = "{% url 'submit:submit_status' 4247 %}";
         let active_diseases_url = "{% url 'pandemic:active_diseases' %}";
         let rules_url = "{% url 'pandemic:rules' %}";
+        let balance = {{ balance }};
         let csrftoken = "{{ csrf_token }}";
     </script>
 </head>
-<body>
-    <div id="editor-container">
+<body style="background-color: #555555;">
+    <!-- Modal -->
+    <div id="assignment-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <embed id="task-pdf" src="" type="application/pdf" width="100%" height="700px" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div id="sleep-overlay"></div>
+    <div id="editor-container" class="row">
         <div class="col-md-8">
             <div id="editor-toolbar" class="row">
-                <select id="language-selector">
+                <label for="task-selector">Task selection</label><select id="task-selector">
+                    {% for task in tasks %}
+                        <option value="{{ task.pk }}" style="background-color: green;">{{ task.name }} ({{ task.points }}b)</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#assignment-modal">Task assignment</button>
+                <label for="language-selector">Language selection</label><select id="language-selector">
                     {% for value, key in submit_cls.LANGUAGE_CHOICES %}
                         <option value={{ value }}>{{ key }}</option>
                     {% endfor %}
                 </select>
-                <button id="submit-button" class="btn-danger">Submit</button>
+                <button id="quicksave-button" class="btn btn-info">Quicksave</button>
+                <button id="restore-button" class="btn btn-info">Restore saved</button>
+                <button id="submit-button" class="btn btn-danger">Submit</button>
             </div>
             <div class="row">
                 <div id="dummy-editor-window" style="display: none" class="col-md-12">
@@ -48,15 +71,28 @@
             </div>
 
         </div>
-        <div class="col-md-4" >
-            <div id="submit-history" class="row">
-
+        <div class="col-md-4">
+            <div class="row">
+                <form method="post" action="{% url "people:logout" %}" class="logout-form">
+                    <input class="btn btn-danger" type="submit" value="Logout" />
+                </form>
             </div>
-            <div id="disease-panel" class="row">
-
+            <div class="row">
+                <h2>Your submits</h2>
+                <div id="submit-history" class="col-md-12">
+                </div>
             </div>
-            <div id="medicine-inventory">
+            <div class="row">
+                <h2>Your diseases</h2>
+                <div id="disease-panel" class="col-md-12">
 
+                </div>
+            </div>
+            <div class="row">
+                <h2>Your medicine inventory</h2>
+                <div id="medicine-inventory" class="col-md-12">
+
+                </div>
             </div>
         </div>
     </div>
@@ -65,12 +101,13 @@
 $( document ).ready(function() {
     function getJson(url, callback){
         fetch(url)
-            .then(response => response.json())
+            .then((response) => {return response.json()})
             .then(data => callback(data))
     }
 
     function postJson(url, data, callback){
-        fetch(code_submit_url, {
+        console.log(url, data);
+        fetch(url, {
             method: 'POST',
               headers: {
                 'Accept': 'application/json',
@@ -92,21 +129,31 @@ $( document ).ready(function() {
     class Disease {
         constructor(intensity){
             this.cooldown_interval = null;
+
             this.active = false;
             this.effect_duration = 0;
             this.cooldown_duration = 0;
-            this.setParameters(intensity, 5000, 5000);
+            this.description = 0;
+
+            this.setParameters(intensity, 1, 1, "", "");
         }
 
-        setParameters(intensity, effect, cooldown){
+        setParameters(name, intensity, effect, cooldown, description){
+            this.name = name;
             this.intensity = intensity;
             this.effect_duration = effect;
             this.cooldown_duration = cooldown;
-            console.log(this.cooldown_duration, this.effect_duration);
+            this.description = description;
         }
 
-        activateEffect(){this.active = true}
-        removeEffect(){this.active = false}
+        activateEffect(){
+            editor.disease_panel.markAsActive(this.name);
+            this.active = true
+        }
+        removeEffect(){
+            editor.disease_panel.markAsInactive(this.name);
+            this.active = false
+        }
 
         manifest(){
             if (this.cooldown_interval){
@@ -211,14 +258,6 @@ $( document ).ready(function() {
     let adhd = new ADHD(0);
 
     class Shortsightedness extends Disease{
-        getEffectDuration(){
-            return this.intensity * 100;
-        }
-
-        getCooldownDuration(){
-            return (100 - this.intensity) * 10000 + 1;
-        }
-
         activateEffect(){
             super.activateEffect();
             $('#editor-window').find('.editor-char').addClass('editor-char-blurred')
@@ -231,6 +270,61 @@ $( document ).ready(function() {
     }
 
     let shortsightedness = new Shortsightedness(0);
+
+    class Stutter extends Disease {
+        getRepeats(){
+            let prob = (this.intensity / 2) / 100;
+            return(Math.random() < prob) ? Math.ceil(Math.random() * 4) : 1;
+        }
+    }
+
+    let stutter = new Stutter();
+
+    class Sleeping extends Disease {
+        constructor(props) {
+            super(props);
+            this.fade_timer = null;
+            this.opacity = 0;
+        }
+
+        activateEffect(){
+            super.activateEffect();
+            $('#sleep-overlay').addClass('dimmer');
+            var sound = new Howl({
+                src: ["{% url "pandemic:yawn" %}"],
+                format: ['mp3'],
+                volume: 0.5,
+                onend: function() {
+                    console.log('Finished!');
+                }
+            });
+            sound.play();
+            this.fade_timer = setInterval(() => {
+                if (this.opacity < 100){
+                    this.opacity = this.opacity += 1;
+                    $('#sleep-overlay').css('opacity', this.opacity / 100);
+                } else {
+                    clearInterval(this.fade_timer);
+                }
+            }, 30);
+        }
+
+        removeEffect(){
+            super.removeEffect();
+            clearInterval(this.fade_timer);
+            this.fade_timer = setInterval(() => {
+                if (this.opacity > 0){
+                    this.opacity = this.opacity -= 1;
+                    $('#sleep-overlay').css('opacity', this.opacity / 100);
+                } else {
+                    clearInterval(this.fade_timer);
+                    $('#sleep-overlay').removeClass('dimmer')
+                }
+            }, 10);
+        }
+    }
+
+    let sleeping = new Sleeping();
 
     class EditorRow {
         constructor(content, pos, parent){
@@ -321,11 +415,14 @@ $( document ).ready(function() {
                     break
                 }
                 default: {
-                    if (non_printable.includes(e.keyCode)) break;
+                    if ([16, 17, 18, 20, 46, 9, 38, 40].includes(e.keyCode)) break;
 
-                    this.content.splice(this.cursor_position, 0, parkinson.mangleKey(e.key));
-                    this.buildCharacters();
-                    this.cursor_position ++;
+                    let mangled_key = parkinson.mangleKey(e.key);
+                    for (var i = 0; i < stutter.getRepeats(); i++){
+                        this.content.splice(this.cursor_position, 0, mangled_key);
+                        this.buildCharacters();
+                        this.cursor_position ++;
+                    }
                     setCursor(this.characters[this.cursor_position]);
                 }
             }
@@ -339,16 +436,8 @@ $( document ).ready(function() {
     }
 
     class EditorWindow {
-        constructor(content){
+        constructor(){
             this.html = $('#editor-window');
-            this.cursor_position = 0;
-            this.rows = content.split('\n').map(
-                (c, i) => {
-                    return new EditorRow(c, i, this)
-                }
-            );
-            this.html.append(...this.rows.map((x) => x.html));
-
             this.cursor_blink = setInterval(() => {
                 if (editor.cursored_element){
                     if (!editor.cursored_element.hasClass('editor-char-cursor')){
@@ -358,6 +447,17 @@ $( document ).ready(function() {
                     }
                 }
             }, 500);
+        }
+
+        setContent(content){
+            this.cursor_position = 0;
+            this.rows = content.split('\n').map(
+                (c, i) => {
+                    return new EditorRow(c, i, this)
+                }
+            );
+            this.html.children().remove();
+            this.html.append(...this.rows.map((x) => x.html));
         }
 
         removeLine(position, remainder){
@@ -387,21 +487,162 @@ $( document ).ready(function() {
         }
 
         getContent(){
-            return this.rows.reduce(
+            let c = this.rows.reduce(
                 (acc, row) => {
                     return acc + row.getContent() + '\n'
                 }, ''
-            )
+            );
+            return c.slice(0, c.length - 1);
         }
     }
 
     class DiseasePanel {
         constructor(){
-            this.diseases = []
+            this.diseases = {};
+            this.disease_tabs = {};
+            this.container = $('#disease-panel');
+
+            this.updateDiseases();
+            this.active_disease_timer = setInterval(
+                () => this.updateDiseases(),
+                2000,
+            );
         }
 
-        update(diseases){
+        markAsActive(disease_name){
+            this.disease_tabs[disease_name].addClass('disease-tab-active')
+        }
 
+        markAsInactive(disease_name){
+            this.disease_tabs[disease_name].removeClass('disease-tab-active')
+        }
+
+        render(){
+            this.container.children().remove();
+            this.disease_list = Object.entries(this.diseases).map(
+                ([disease_name, disease]) => {
+                    let stats = '(Cooldown ' + disease.cooldown_duration / 1000 + 's, effect '+ disease.effect_duration / 1000 + 's)';
+                    let el = $('<div/>')
+                        .html(disease_name + stats)
+                        .addClass('disease-tab');
+                    if (this.diseases[disease_name].active) el.addClass('disease-tab-active');
+                    this.disease_tabs[disease_name] = el;
+                    return el;
+                }
+            );
+            this.container.append(
+                this.disease_list
+            )
+        }
+
+        updateDiseases(){
+            getJson("{% url 'pandemic:active_diseases' %}", (data) => {
+                data.forEach((instance) => {
+                    let cls = undefined;
+                    let disease_name = instance.disease.name;
+                    let params = [
+                        disease_name,
+                        instance.severity,
+                        instance.effect_duration * 1000,
+                        instance.cooldown_duration * 1000,
+                        instance.disease.description,
+                    ];
+                    switch(disease_name){
+                        case 'Shortsightedness': {
+                            cls = shortsightedness;
+                            break
+                        }
+                        case 'Parkinson': {
+                            cls = parkinson;
+                            break
+                        }
+                        case 'ADHD': {
+                            cls = adhd;
+                            break;
+                        }
+                        case 'Stutter': {
+                            cls = stutter;
+                            break;
+                        }
+                        case 'Sleeping': {
+                            cls = sleeping;
+                            break;
+                        }
+                        default: {
+                            break
+                        }
+                    }
+                    cls.setParameters(...params);
+                    if(!this.diseases[disease_name]){
+                        this.diseases[disease_name] = cls;
+                        this.render();
+                        cls.manifest();
+                    }
+                    this.render();
+                });
+            });
+        }
+    }
+
+    class MedicinePanel{
+        constructor(){
+            setInterval(
+                () => this.updateMedicine(),
+                2000
+            );
+            this.balance = balance;
+            this.container = $('#medicine-inventory');
+            this.useMedicine = this.useMedicine.bind(this);
+            this.purchaseMedicine = this.purchaseMedicine.bind(this);
+            this.updateMedicine();
+        }
+
+        render(data){
+            let meds = data.map(
+                (med) => {
+                    return $('<div/>')
+                        .addClass('medicine-item')
+                        .append(
+                        $('<button/>')
+                            .data('medicine_pk', med.medicine_pk)
+                            .addClass('btn btn-info')
+                            .html('Use '+ med.medicine_name + '('+ med.amount +')')
+                            .click(this.useMedicine))
+                        .append(
+                        $('<button/>')
+                            .data('medicine_pk', med.medicine_pk)
+                            .addClass('btn btn-danger')
+                            .html('Purchase for $' + med.price)
+                            .click(this.purchaseMedicine)
+                        )
+                }
+            );
+            this.container.children().remove();
+            this.container.append(
+                $('<h3/>').html('Current accout balance: $' + this.balance)
+            );
+            this.container.append(meds);
+        }
+
+        purchaseMedicine(event){
+            let url = "{% url "pandemic:buy_medicine" %}";
+            postJson(url, {medicine_pk: $(event.currentTarget).data('medicine_pk')}, (data) => {
+                this.balance = data.balance;
+                this.updateMedicine();
+            });
+        }
+
+        useMedicine(event){
+            let url = "{% url "pandemic:thefuck" %}";
+            postJson(url, {medicine_pk: $(event.currentTarget).data('medicine_pk')}, (data) => {
+                if (!data.message) this.render(data);
+            });
+        }
+
+        updateMedicine(){
+            getJson("{% url "pandemic:thefuck" %}", (data) => {
+                this.render(data);
+            });
         }
     }
 
@@ -412,15 +653,23 @@ $( document ).ready(function() {
 
         addSubmit(submit_id){
             this.container.append(
-                $('<div/>').html('Submit ' + submit_id + ': Waiting').addClass('row').data('submit-id', submit_id)
+                $('<div/>').html('Submit ' + submit_id + ': Waiting').data('submit-id', submit_id)
             )
         }
 
-        updateSubmitStatus(id, status){
+        updateSubmitStatus(id, status, task_id){
             this.container
                 .children()
                 .filter((i, el) => {return $(el).data('submit-id') === id})
-                .html('Submit ' + id + ': Processed')
+                .html('Submit ' + id + editor.rules.submit_statuses[status]);
+            if (editor.rules.submit_statuses[status]){
+                console.log($('#task-selector').children().filter((el) => el.value === task_id));
+                $('#task-selector').children().filter((el) => el.value === task_id).forEach(
+                    (el) => {
+                        el.text(el.text() + 'Done')
+                    }
+                )
+            }
         }
     }
 
@@ -429,26 +678,37 @@ $( document ).ready(function() {
             this.cursored_element = undefined;
 
             this.updateRules();
-            this.manifested_diseases = [];
-            this.active_disease_timer = setInterval(
-                () => this.updateDiseases(),
-                2000,
-            );
             this.rule_update_timer = setInterval(
                 () => this.updateRules(),
                 20000
             );
-            this.editor_window = new EditorWindow('Hello World\nPlease work\nReally tho');
+
+            this.editor_window = new EditorWindow();
+            this.editor_window.setContent('Hello World\nPlease work\nReally tho');
             this.submit_history = new SubmitHistory();
+            this.medicine_panel = new MedicinePanel();
             this.disease_panel = new DiseasePanel();
             $('#submit-button').click(this.submitCode.bind(this));
+            $('#quicksave-button').click(this.quickSave.bind(this));
+            $('#restore-button').click(this.restore.bind(this));
+
+            $('#task-selector').change(this.changeTask);
+            this.changeTask();
+            this.saved_code = "";
+        }
+
+        changeTask(){
+            let val = $('#task-selector').val();
+                $('#task-pdf').attr(
+                    'src', "{% url "submit:task_assignment" 4247 %}".replace('4247', val) + "?" + new Date().getTime()
+            )
         }
 
         submitCode(){
             let payload = {
                 code: this.editor_window.getContent(),
                 language: $('#language-selector').val(),
-                task: 1
+                task: $('#task-selector').val()
             };
             postJson("{% url 'submit:code_submit' %}", payload, (response) => {
                 this.submit_history.addSubmit(response.submit_id);
@@ -459,58 +719,28 @@ $( document ).ready(function() {
             })
         }
 
+        quickSave(e){
+            this.saved_code = this.editor_window.getContent();
+        }
+
+        restore(e){
+            this.editor_window.setContent(this.saved_code);
+        }
+
         pollSubmitResult(submit_id){
             let base_url = "{% url 'submit:submit_status' 4247 %}";
             getJson(base_url.replace('4247', submit_id), (response) => {
                 if (response.status > 1){
-                    this.submit_history.updateSubmitStatus(submit_id);
+                    this.submit_history.updateSubmitStatus(submit_id, response.status);
                     clearInterval(this.submit_result_timer);
                 }
             })
-        }
-
-        updateDiseases(){
-            getJson("{% url 'pandemic:active_diseases' %}", (data) => {
-                this.disease_panel.update(data);
-                data.forEach((instance) => {
-                    console.log(instance);
-                    let cls = undefined;
-                    let params = [instance.severity, instance.effect_duration * 1000, instance.cooldown_duration* 1000];
-                    switch(instance.disease.name){
-                        case 'Shortsightedness': {
-                            cls = shortsightedness;
-                            shortsightedness.setParameters(...params);
-                            break
-                        }
-                        case 'Parkinson': {
-                            cls = parkinson;
-                            parkinson.setParameters(...params);
-                            break
-                        }
-                        case 'ADHD': {
-                            cls = adhd;
-                            adhd.setParameters(...params);
-                            break;
-                        }
-                        default: {
-                            break
-                        }
-                    }
-
-                    if (!this.manifested_diseases.includes(instance.disease.name)){
-                        if (cls) cls.manifest();
-                        this.manifested_diseases.push(instance.disease.name);
-                    }
-                });
-                this.diseases = data
-            });
         }
 
         updateRules(){
             getJson("{% url 'pandemic:rules' %}", (data) => {this.rules = data});
         }
     }
-    let non_printable = [16, 17, 18, 20, 46, 9, 38, 40];
     let editor = new Editor();
 });
 </script>

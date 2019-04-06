@@ -1,0 +1,24 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HellWorld editor</title>
+
+    <link href="{% static "pandemic/jquery-ui.css" %}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{% static "pandemic/bootstrap.min.css" %}">
+    <script src="{% static "pandemic/jquery.min.js" %}"></script>
+    <script src="{% static "pandemic/popper.min.js" %}"></script>
+    <script src="{% static "pandemic/bootstrap.min.js" %}"></script>
+    <script type="text/javascript">
+    </script>
+</head>
+<body style="background-color: #555555;">
+    <div class="container">
+        {% for team_name, points in team_scores.items %}
+            <div class="row">{{ team_name }}: {{ points }} points</div>
+        {% endfor %}
+    </div>
+
+</body>

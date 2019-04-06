@@ -8,6 +8,9 @@ class Task(models.Model):
     time_limit = models.IntegerField(default=5000)
     memory_limit = models.IntegerField(default=5000)
 
+    def __str__(self):
+        return self.name
+
 
 class Submit(models.Model):
     STATUS_WAITING = 0

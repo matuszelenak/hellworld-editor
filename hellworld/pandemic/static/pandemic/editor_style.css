@@ -1,14 +1,44 @@
-#editor-window{
-    border-style: solid;
-    border-width: 2px 2px 2px 2px;
-    border-color: black;
+#body{
+    color: #505050;
+    background-color: #505050;
+}
+
+#editor-container{
+    color:white;
+}
+
+#editor-toolbar{
+    color: white;
+    margin: 5px;
+    background: #245269;
+    padding-right: 50px;
+}
+
+#editor-toolbar > * {
+    margin-right: 30px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+#editor-window > * {
+    margin: 0px 10px 0px 10px;
 }
 
 .editor-row {
     position: relative;
     margin-bottom: 5px;
     font-family: "Courier New", Courier, monospace;
-    background-color: lightgray;
+    background-color: #3c3c3c;
+   -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+*:focus {
+    outline: none;
 }
 
 .editor-char {
@@ -35,17 +65,50 @@
 .editor-char-cursor{
     border-style: solid;
     border-width: 0 0 0 2px;
-    border-color: black;
+    border-color: white;
     margin-left: 0;
 }
 
 .editor-char-blurred {
     color: transparent;
-    text-shadow: 0 0 5px rgba(0,0,0,0.8);
-    border-color: darkgray;
+    text-shadow: 0 0 4px rgba(255,255,255,0.8);
+}
 
+.disease-tab {
+    text-align: center;
+    margin:2px;
+}
+
+.disease-tab-active {
+    border-style: solid;
+    margin: 0px;
+    border-width: 2px 2px 2px 2px;
+    border-color: lawngreen;
+}
+
+.medicine-item> * {
+    margin: 10px;
+}
+
+.logout-form{
+    display: inline;-
+    float: right;
+}
+
+.dimmer {
+    background: #000;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
 }
 
 img{
     max-width:100%;
+}
+
+h2{
+    text-align: center;
 }

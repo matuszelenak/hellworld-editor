@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from people.forms import ParticipantChangeForm, ParticipantCreationForm
-from people.models import Participant, Team, BluetoothTag
+from people.models import Participant, Team, BluetoothTag, MedicineSupply
 
 
 @admin.register(Participant)
@@ -19,4 +19,9 @@ class TeamAdmin(admin.ModelAdmin):
 
 @admin.register(BluetoothTag)
 class BluetoothTagAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(MedicineSupply)
+class MedicineSupplyAdmin(admin.ModelAdmin):
     pass

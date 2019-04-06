@@ -20,14 +20,14 @@ class DiseaseClass(models.Model):
 
 class DiseaseInstance(models.Model):
     disease = models.ForeignKey('pandemic.DiseaseClass', related_name='instances', on_delete=models.CASCADE)
-    participant = models.ForeignKey('people.Participant', related_name='diseases', on_delete=models.CASCADE)
+    team = models.ForeignKey('people.Team', related_name='diseases', on_delete=models.CASCADE)
 
     effect_duration = models.IntegerField(default=5)
     cooldown_duration = models.IntegerField(default=60)
     severity = models.IntegerField(null=False, default=1)
 
     def __str__(self):
-        return f'{str(self.disease)} on {str(self.participant)}'
+        return f'{str(self.disease)} on {str(self.team)}'
 
 
 class DiseaseTransmit(models.Model):
@@ -35,13 +35,26 @@ class DiseaseTransmit(models.Model):
     tag = models.ForeignKey('people.BluetoothTag', related_name='transmissions', on_delete=models.CASCADE)
     severity = models.IntegerField(null=False)
 
+    def __str__(self):
+        return f'{str(self.tag)} carries {str(self.disease)}'
+
 
 class MedicineClass(models.Model):
+    price = models.IntegerField(default=5)
     name = models.TextField(null=False)
     description = models.TextField()
+
+    def __str__(self):
+        return self.name
 
 
 class MedicineEffect(models.Model):
     medicine = models.ForeignKey('pandemic.MedicineClass', related_name='applications', on_delete=models.CASCADE)
     disease = models.ForeignKey('pandemic.DiseaseClass', related_name='applied_medicines', on_delete=models.CASCADE)
-    strength = models.IntegerField()
+
+    severity_multiplier = models.FloatField(default=0.5)
+    effect_multiplier = models.FloatField(default=0.5)
+    cooldown_multiplier = models.FloatField(default=2)
+
+    def __str__(self):
+        return str(self.medicine) + ' works on ' + str(self.disease)

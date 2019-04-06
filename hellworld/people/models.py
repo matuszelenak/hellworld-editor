@@ -6,6 +6,10 @@ from django.contrib.auth.models import User, PermissionsMixin, AbstractUser
 class Team(models.Model):
     name = models.CharField(max_length=40, null=False)
     logged_in = models.OneToOneField('people.Participant', on_delete=models.SET_NULL, null=True, related_name='+')
+    resources = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
 
 
 class Participant(AbstractUser):
@@ -20,7 +24,11 @@ class BluetoothTag(models.Model):
     address = models.TextField(null=False)
     team = models.ForeignKey('people.Team', related_name='tags', on_delete=models.CASCADE, null=True)
 
+    def __str__(self):
+        return f'{self.address[-6:]} {self.team}'
+
 
 class MedicineSupply(models.Model):
-    participant = models.ForeignKey('people.Participant', related_name='medicine_supplies', on_delete=models.CASCADE)
+    amount = models.IntegerField(default=0)
+    team = models.ForeignKey('people.Team', related_name='medicine_supplies', on_delete=models.CASCADE)
     medicine = models.ForeignKey('pandemic.MedicineClass', related_name='participant_supplies', on_delete=models.CASCADE)
