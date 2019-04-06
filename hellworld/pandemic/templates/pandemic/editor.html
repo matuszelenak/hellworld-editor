@@ -39,10 +39,11 @@
                     {% endfor %}
                 </select>
                 <button id="submit-button" class="btn-danger">Submit</button>
-                <button id="adhd" class="btn-default">ADHD</button>
             </div>
             <div class="row">
-                <div id="dummy-editor-window" style="display: none"></div>
+                <div id="dummy-editor-window" style="display: none" class="col-md-12">
+                    <img id="adhd-img" src="">
+                </div>
                 <div id="editor-window" class="col-md-12" style="margin: 0px"></div>
             </div>
 
@@ -91,18 +92,21 @@ $( document ).ready(function() {
     class Disease {
         constructor(intensity){
             this.cooldown_interval = null;
-            this.setIntensity(intensity);
             this.active = false;
+            this.effect_duration = 0;
+            this.cooldown_duration = 0;
+            this.setParameters(intensity, 5000, 5000);
         }
 
-        setIntensity(intensity){
+        setParameters(intensity, effect, cooldown){
             this.intensity = intensity;
+            this.effect_duration = effect;
+            this.cooldown_duration = cooldown;
+            console.log(this.cooldown_duration, this.effect_duration);
         }
 
         activateEffect(){this.active = true}
         removeEffect(){this.active = false}
-        getEffectDuration(){}
-        getCooldownDuration(){}
 
         manifest(){
             if (this.cooldown_interval){
@@ -112,7 +116,7 @@ $( document ).ready(function() {
             this.activateEffect();
             this.interval = setInterval(
                 this.deactivate.bind(this),
-                this.getEffectDuration()
+                this.effect_duration
             )
         }
 
@@ -123,7 +127,7 @@ $( document ).ready(function() {
             this.removeEffect();
             this.cooldown_interval = setInterval(
                 this.manifest.bind(this),
-                this.getCooldownDuration()
+                this.cooldown_duration
             )
         }
     }
@@ -141,14 +145,6 @@ $( document ).ready(function() {
                 [[-1, 0], [-1, -1], [0, -1], [0, 1], [1, 0], [1, -1]],
                 [[-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0], [1, 1]]
             ];
-        }
-
-        getEffectDuration(){
-            return this.intensity * 100 * 5;
-        }
-
-        getCooldownDuration(){
-            return (100 - this.intensity) + 1;
         }
 
         getKeyAtCoordinates(x, y){
@@ -196,6 +192,23 @@ $( document ).ready(function() {
     }
 
     let parkinson = new Parkinson(0);
+
+    class ADHD extends Disease {
+        activateEffect(){
+            super.activateEffect();
+            $('#editor-window').hide();
+            $("#adhd-img").attr("src", "{% url "pandemic:adhd" %}" + "?" + new Date().getTime());
+            $('#dummy-editor-window').show();
+        }
+        removeEffect(){
+            super.removeEffect();
+            $("#adhd-img").attr("src", "");
+            $('#dummy-editor-window').hide();
+            $('#editor-window').show();
+        }
+    }
+
+    let adhd = new ADHD(0);
 
     class Shortsightedness extends Disease{
         getEffectDuration(){
@@ -460,17 +473,24 @@ $( document ).ready(function() {
             getJson("{% url 'pandemic:active_diseases' %}", (data) => {
                 this.disease_panel.update(data);
                 data.forEach((instance) => {
+                    console.log(instance);
                     let cls = undefined;
+                    let params = [instance.severity, instance.effect_duration * 1000, instance.cooldown_duration* 1000];
                     switch(instance.disease.name){
                         case 'Shortsightedness': {
                             cls = shortsightedness;
-                            shortsightedness.setIntensity(instance.severity);
+                            shortsightedness.setParameters(...params);
                             break
                         }
                         case 'Parkinson': {
                             cls = parkinson;
-                            parkinson.setIntensity(instance.severity);
+                            parkinson.setParameters(...params);
                             break
+                        }
+                        case 'ADHD': {
+                            cls = adhd;
+                            adhd.setParameters(...params);
+                            break;
                         }
                         default: {
                             break
@@ -482,11 +502,6 @@ $( document ).ready(function() {
                         this.manifested_diseases.push(instance.disease.name);
                     }
                 });
-                //for (let key in data){
-                 //   if (!this.diseases.hasOwnProperty(key)){
-                 //       this.manifested_diseases.key = true;
-                 //   }
-                //}
                 this.diseases = data
             });
         }

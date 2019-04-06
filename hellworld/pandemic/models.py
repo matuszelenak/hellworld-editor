@@ -21,7 +21,13 @@ class DiseaseClass(models.Model):
 class DiseaseInstance(models.Model):
     disease = models.ForeignKey('pandemic.DiseaseClass', related_name='instances', on_delete=models.CASCADE)
     participant = models.ForeignKey('people.Participant', related_name='diseases', on_delete=models.CASCADE)
+
+    effect_duration = models.IntegerField(default=5)
+    cooldown_duration = models.IntegerField(default=60)
     severity = models.IntegerField(null=False, default=1)
+
+    def __str__(self):
+        return f'{str(self.disease)} on {str(self.participant)}'
 
 
 class DiseaseTransmit(models.Model):

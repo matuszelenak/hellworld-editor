@@ -12,6 +12,9 @@ class Participant(AbstractUser):
     team = models.ForeignKey('people.Team', related_name='members', on_delete=models.SET_NULL, null=True, blank=True)
     is_organiser = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.username
+
 
 class BluetoothTag(models.Model):
     address = models.TextField(null=False)

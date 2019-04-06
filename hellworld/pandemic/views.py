@@ -1,11 +1,14 @@
 import json
+import os
+import random
 
 from django.db import transaction
-from django.http import JsonResponse, HttpResponseBadRequest, Http404
-from django.shortcuts import get_object_or_404
+from django.http import JsonResponse, HttpResponseBadRequest, Http404, HttpResponse
+from django.shortcuts import get_object_or_404, render
 from django.views import View
 from django.views.generic import TemplateView
 
+from hellworld import settings
 from pandemic.models import DiseaseInstance, DiseaseTransmit, DiseaseClass
 from pandemic.serializers import DiseaseInstanceSerializer
 from people.models import BluetoothTag, Team
@@ -87,3 +90,10 @@ class BluetoothTagSubmitView(View):
         else:
             return JsonResponse({'result': 'dodged'})
 
+
+class ADHDPagesView(View):
+    def get(self, request, *args, **kwargs):
+        img_dir = os.path.join(settings.MEDIA_ROOT, 'adhd_screenshots')
+        img = random.choice(os.listdir(img_dir))
+        image_data = open(os.path.join(img_dir, img), "rb").read()
+        return HttpResponse(image_data, content_type="image/png")
