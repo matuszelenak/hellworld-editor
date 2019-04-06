@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView
 
-from pandemic.models import DiseaseInstance, DiseaseTransmit
+from pandemic.models import DiseaseInstance, DiseaseTransmit, DiseaseClass
 from pandemic.serializers import DiseaseInstanceSerializer
 from people.models import BluetoothTag, Team
 from submit.models import Submit
@@ -32,7 +32,14 @@ class CompetitionRules(View):
         data = {
             'languages': {
                 k: v for v, k in Submit.LANGUAGE_CHOICES
-            }
+            },
+            'diseases': [
+                {
+                    'name': x.name,
+                    'description': x.description
+                }
+                for x in DiseaseClass.objects.all()
+            ]
         }
 
         return JsonResponse(data)

@@ -2,7 +2,7 @@
     position: relative;
     margin-bottom: 5px;
     font-family: "Courier New", Courier, monospace;
-    background-color: red;
+    background-color: lightgray;
 }
 
 .editor-char {
@@ -10,16 +10,32 @@
     font-size: 20px;
     display: inline;
     padding: 5px;
-    border-width: 0 0 0 2px;
-    border-color: black;
     margin-left: 2px;
+   -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
 
 .editor-sentinel-char {
     font-size: 20px;
     padding: 5px;
     display: inline;
+    margin-left: 2px;
+}
+
+.editor-char-cursor{
+    border-style: solid;
     border-width: 0 0 0 2px;
     border-color: black;
-    margin-left: 2px;
+    margin-left: 0;
+}
+
+.editor-char-blurred {
+    color: transparent;
+    text-shadow: 0 0 5px rgba(0,0,0,0.8);
+    border-color: darkgray;
+
 }

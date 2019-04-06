@@ -8,3 +8,4 @@ class DiseaseInstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = DiseaseInstance
         fields = ('severity', 'disease')
+        depth = 2

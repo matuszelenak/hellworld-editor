@@ -14,6 +14,9 @@ class DiseaseClass(models.Model):
     description = models.TextField()
     type = models.IntegerField(choices=TYPES)
 
+    def __str__(self):
+        return self.name
+
 
 class DiseaseInstance(models.Model):
     disease = models.ForeignKey('pandemic.DiseaseClass', related_name='instances', on_delete=models.CASCADE)
