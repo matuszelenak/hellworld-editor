@@ -1,5 +1,12 @@
 version: '3'
 services:
+  db:
+    image: postgres:10.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=hellworld
+      - POSTGRES_DB=hellworld
   web:
     build: .
     image: hellworld
@@ -8,6 +15,7 @@ services:
     volumes:
       - .:/hellworld
     depends_on:
+      - db
       - redis
       - celery
     environment:
@@ -24,3 +32,6 @@ services:
     command: celery -A hellworld worker -l DEBUG -E
     volumes:
       - .:/hellworld
+
+volumes:
+  postgres_data:
