@@ -1,0 +1,42 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HellWorld editor</title>
+
+    <link href="{% static "pandemic/jquery-ui.css" %}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{% static "pandemic/bootstrap.min.css" %}">
+    <script src="{% static "pandemic/jquery.min.js" %}"></script>
+    <script src="{% static "pandemic/popper.min.js" %}"></script>
+    <script src="{% static "pandemic/bootstrap.min.js" %}"></script>
+</head>
+<body>
+    <div class="container">
+        {% for dis in diseases %}
+            <div class="row">
+                <div class="col-md-3">
+                    <h2>{{ dis.name }}</h2>
+                </div>
+                <div class="col-md-9">
+                    <form method="POST" action="{% url "pandemic:set_balance" dis.pk %}">
+                        <label>
+                            Severity
+                            <input type="number" value="0" name="severity">
+                        </label>
+                        <label>
+                            Effect
+                            <input type="number" value="0" name="effect">
+                        </label>
+                        <label>
+                            Cooldown
+                            <input type="number" value="0" name="cooldownw">
+                        </label>
+                        <input type="submit" class="btn btn-info" value="Add">
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>

@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import random
 
@@ -32,10 +33,53 @@ class EditorView(TemplateView):
                     }
                     for task in Task.objects.order_by('name')
                 ],
-                'balance': self.request.user.team.resources
+                'balance': self.request.user.team.resources if self.request.user.team else 0
             }
         )
         return data
+
+
+class ResourceView(TemplateView):
+    template_name = 'pandemic/resources.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data.update({
+            'teams': [team for team in Team.objects.order_by('name')]
+        })
+        return data
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        if kwargs.get('team_pk', None):
+            resource = request.POST.get('resource', 0)
+            team = Team.objects.get(pk=kwargs['team_pk'])
+            team.resources = team.resources + int(resource)
+            team.save()
+        return self.get(request, *args, **kwargs)
+
+
+class DiseaseBalance(TemplateView):
+    template_name = 'pandemic/balance.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data.update({
+            'diseases': [x for x in DiseaseClass.objects.order_by('name')]
+        })
+        return data
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        if kwargs.get('disease_pk', None):
+            disease = DiseaseClass.objects.get(pk=kwargs['disease_pk'])
+            instances = DiseaseInstance.objects.filter(disease=disease)
+            for ins in instances:
+                ins.severity = ins.severity + int(request.POST.get('severity', 0))
+                ins.effect_duration = ins.effect_duration + int(request.POST.get('effect', 0))
+                ins.cooldown_duration = ins.cooldown_duration + int(request.POST.get('cooldown', 0))
+                ins.save()
+        return self.get(request, *args, **kwargs)
 
 
 class CompetitionRules(View):
@@ -62,7 +106,7 @@ class CompetitionRules(View):
 
 class ActiveDiseaseInstancesView(View):
     def get(self, request, *args, **kwargs):
-        instances = DiseaseInstance.objects.select_related('disease', 'team').filter(team=request.user.team)
+        instances = DiseaseInstance.objects.select_related('disease', 'team').filter(team=request.user.team, severity__gt=0)
         serializer = DiseaseInstanceSerializer(instances, many=True)
 
         return JsonResponse(serializer.data, safe=False)
@@ -131,9 +175,9 @@ class MedicineInventory(View):
             print(medicine_effect)
             for inst in DiseaseInstance.objects.filter(team=team, disease=medicine_effect.disease):
                 print(inst)
-                inst.cooldown_duration = inst.cooldown_duration * medicine_effect.cooldown_multiplier
-                inst.effect_duration = inst.effect_duration * medicine_effect.effect_multiplier
-                inst.severity = inst.severity * medicine_effect.severity_multiplier
+                inst.cooldown_duration = math.ceil(inst.cooldown_duration * medicine_effect.cooldown_multiplier)
+                inst.effect_duration = math.ceil(inst.effect_duration * medicine_effect.effect_multiplier)
+                inst.severity = math.ceil(inst.severity * medicine_effect.severity_multiplier)
                 inst.save()
 
         supply.amount -= 1
@@ -166,9 +210,28 @@ class ADHDPagesView(View):
         return HttpResponse(image_data, content_type="image/png")
 
 
+class FluView(View):
+    def get(self, request, *args, **kwargs):
+        img_dir = os.path.join(settings.MEDIA_ROOT, 'flu_snots')
+        img = random.choice(os.listdir(img_dir))
+        image_data = open(os.path.join(img_dir, img), "rb").read()
+        return HttpResponse(image_data, content_type="image/png")
+
+
 class YawnView(View):
     def get(self, request, *args, **kwargs):
         fname = os.path.join(settings.MEDIA_ROOT, 'sounds', 'yawn.mp3')
+        f = open(fname, "rb")
+        response = HttpResponse()
+        response.write(f.read())
+        response['Content-Type'] = 'audio/mp3'
+        response['Content-Length'] = os.path.getsize(fname)
+        return response
+
+
+class SneezeView(View):
+    def get(self, request, *args, **kwargs):
+        fname = os.path.join(settings.MEDIA_ROOT, 'sounds', 'sneeze.mp3')
         f = open(fname, "rb")
         response = HttpResponse()
         response.write(f.read())

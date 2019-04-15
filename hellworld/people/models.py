@@ -32,3 +32,6 @@ class MedicineSupply(models.Model):
     amount = models.IntegerField(default=0)
     team = models.ForeignKey('people.Team', related_name='medicine_supplies', on_delete=models.CASCADE)
     medicine = models.ForeignKey('pandemic.MedicineClass', related_name='participant_supplies', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.team} has {self.medicine}'

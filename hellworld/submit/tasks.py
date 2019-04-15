@@ -34,12 +34,11 @@ class ScoringTask(Task):
 
         for infile_path in sorted([x for x in os.listdir(inputs_path) if os.path.splitext(x)[-1] == '.in']):
             input_data = open(os.path.join(inputs_path, infile_path), 'rb').read()
-            output_data = open(os.path.join(inputs_path, os.path.splitext(infile_path)[0] + '.out'), 'rb').read()[:-1]
+            output_data = open(os.path.join(inputs_path, os.path.splitext(infile_path)[0] + '.tst'), 'rb').read()
 
             start = datetime.datetime.now()
             try:
-                run_command = 'ulimit -v {mem} && {base}'.format(
-                    mem=submit.task.memory_limit,
+                run_command = '{base}'.format(
                     base=base_command
                 )
                 print(run_command)

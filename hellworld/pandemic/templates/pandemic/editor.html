@@ -12,7 +12,7 @@
     <script src="{% static "pandemic/jquery.min.js" %}"></script>
     <script src="{% static "pandemic/popper.min.js" %}"></script>
     <script src="{% static "pandemic/bootstrap.min.js" %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.1.1/howler.min.js"></script>
+    <script src="{% static "pandemic/howler.min.js" %}"></script>
     <script type="text/javascript">
         let logout_link = "{% url 'people:logout' %}";
         let task_pdf_link = "{% url 'submit:task_assignment' 1 %}";
@@ -45,6 +45,7 @@
       </div>
     </div>
     <div id="sleep-overlay"></div>
+    <div id="flu-overlay"></div>
     <div id="editor-container" class="row">
         <div class="col-md-8">
             <div id="editor-toolbar" class="row">
@@ -73,6 +74,7 @@
         </div>
         <div class="col-md-4">
             <div class="row">
+
                 <form method="post" action="{% url "people:logout" %}" class="logout-form">
                     <input class="btn btn-danger" type="submit" value="Logout" />
                 </form>
@@ -85,13 +87,11 @@
             <div class="row">
                 <h2>Your diseases</h2>
                 <div id="disease-panel" class="col-md-12">
-
                 </div>
             </div>
             <div class="row">
                 <h2>Your medicine inventory</h2>
                 <div id="medicine-inventory" class="col-md-12">
-
                 </div>
             </div>
         </div>
@@ -106,7 +106,7 @@ $( document ).ready(function() {
     }
 
     function postJson(url, data, callback){
-        console.log(url, data);
+
         fetch(url, {
             method: 'POST',
               headers: {
@@ -159,7 +159,6 @@ $( document ).ready(function() {
             if (this.cooldown_interval){
                 clearInterval(this.cooldown_interval);
             }
-            if (this.intensity === 0) return;
             this.activateEffect();
             this.interval = setInterval(
                 this.deactivate.bind(this),
@@ -325,6 +324,49 @@ $( document ).ready(function() {
     }
 
     let sleeping = new Sleeping();
+
+    class Flu extends Disease{
+        constructor(props) {
+            super(props);
+            this.opacity = 0;
+        }
+
+        activateEffect(){
+            super.activateEffect();
+            this.opacity = 100;
+            var sound = new Howl({
+                src: ["{% url "pandemic:sneeze" %}"],
+                format: ['mp3'],
+                volume: 0.5,
+                onend: function() {
+                    console.log('Finished!');
+                }
+            });
+            sound.play();
+            this.i = setInterval(() => {
+                let url = "{% url "pandemic:flu" %}" + "?" + new Date().getTime();
+                $('#flu-overlay').addClass('flu-snot');
+                $('#flu-overlay').css('background-image', 'url(' + url + ')');
+                $('#flu-overlay').css('opacity', this.opacity);
+                clearInterval(this.i);
+            }, 1300);
+        }
+
+        removeEffect(){
+            super.removeEffect();
+            this.fade_timer = setInterval(() => {
+                if (this.opacity > 0){
+                    this.opacity = this.opacity -= 1;
+                    $('#flu-overlay').css('opacity', this.opacity / 100);
+                } else {
+                    clearInterval(this.fade_timer);
+                    $('#flu-overlay').removeClass('flu-snot')
+                }
+            }, 30);
+        }
+    }
+
+    let flu = new Flu();
 
     class EditorRow {
         constructor(content, pos, parent){
@@ -568,6 +610,10 @@ $( document ).ready(function() {
                             cls = sleeping;
                             break;
                         }
+                        case 'Flu': {
+                            cls = flu;
+                            break;
+                        }
                         default: {
                             break
                         }
@@ -629,6 +675,7 @@ $( document ).ready(function() {
             postJson(url, {medicine_pk: $(event.currentTarget).data('medicine_pk')}, (data) => {
                 this.balance = data.balance;
                 this.updateMedicine();
+                editor.disease_panel.updateDiseases();
             });
         }
 
@@ -649,27 +696,36 @@ $( document ).ready(function() {
     class SubmitHistory {
         constructor(){
             this.container = $('#submit-history')
+            this.submits = []
         }
 
-        addSubmit(submit_id){
+        addSubmit(submit_id, task_name){
+            this.submits.push({
+                id: submit_id,
+                task_name: task_name,
+                status: 'Processing'
+            });
+            this.render()
+        }
+
+        updateSubmitStatus(id, status){
+            this.submits.map((submit) => {
+                if (submit.id === id){
+                    submit.status = editor.rules.submit_statuses[status];
+                }
+                return submit;
+            });
+            this.render()
+        }
+
+        render(){
+            this.container.children().remove();
             this.container.append(
-                $('<div/>').html('Submit ' + submit_id + ': Waiting').data('submit-id', submit_id)
+                this.submits.map((submit) => {
+                    return $('<div/>').html('Submit ' + submit.id + ' for ' + submit.task_name + ': '+ submit.status)
+                        .addClass(submit.status === 2 ? 'submit-ok' : 'submit-wrong')
+                })
             )
-        }
-
-        updateSubmitStatus(id, status, task_id){
-            this.container
-                .children()
-                .filter((i, el) => {return $(el).data('submit-id') === id})
-                .html('Submit ' + id + editor.rules.submit_statuses[status]);
-            if (editor.rules.submit_statuses[status]){
-                console.log($('#task-selector').children().filter((el) => el.value === task_id));
-                $('#task-selector').children().filter((el) => el.value === task_id).forEach(
-                    (el) => {
-                        el.text(el.text() + 'Done')
-                    }
-                )
-            }
         }
     }
 
@@ -684,7 +740,11 @@ $( document ).ready(function() {
             );
 
             this.editor_window = new EditorWindow();
-            this.editor_window.setContent('Hello World\nPlease work\nReally tho');
+            let saved = localStorage.getItem('saved_code')
+            if (!saved){
+                saved = 'Welcome to HellWorld!';
+            }
+            this.editor_window.setContent(saved);
             this.submit_history = new SubmitHistory();
             this.medicine_panel = new MedicinePanel();
             this.disease_panel = new DiseasePanel();
@@ -705,13 +765,15 @@ $( document ).ready(function() {
         }
 
         submitCode(){
+            this.quickSave();
             let payload = {
                 code: this.editor_window.getContent(),
                 language: $('#language-selector').val(),
                 task: $('#task-selector').val()
             };
             postJson("{% url 'submit:code_submit' %}", payload, (response) => {
-                this.submit_history.addSubmit(response.submit_id);
+                console.log(response);
+                this.submit_history.addSubmit(response.submit_id, response.task_name);
                 this.submit_result_timer = setInterval(
                     () => this.pollSubmitResult(response.submit_id),
                     2000
@@ -720,11 +782,11 @@ $( document ).ready(function() {
         }
 
         quickSave(e){
-            this.saved_code = this.editor_window.getContent();
+            localStorage.setItem('saved_code', this.editor_window.getContent());
         }
 
         restore(e){
-            this.editor_window.setContent(this.saved_code);
+            this.editor_window.setContent(localStorage.getItem('saved_code'));
         }
 
         pollSubmitResult(submit_id){
@@ -741,6 +803,20 @@ $( document ).ready(function() {
             getJson("{% url 'pandemic:rules' %}", (data) => {this.rules = data});
         }
     }
+
+    this.logout_interval = setInterval(() => {
+        fetch("{% url "people:logout" %}", {
+            method: 'POST',
+              headers: {
+                'X-CSRFToken': csrftoken
+              },
+            body: ""
+        })
+        .then(() => {
+            clearInterval(this.logout_interval);
+            location.href = "{% url "people:login" %}"
+        });
+    }, 60 * 1000 * 25);
     let editor = new Editor();
 });
 </script>

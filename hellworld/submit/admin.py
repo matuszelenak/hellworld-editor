@@ -1,6 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
+from django.db import transaction
+
 from submit.models import Task, Submit, SubmitScore
 
 
@@ -11,7 +13,11 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(Submit)
 class SubmitAdmin(admin.ModelAdmin):
-    pass
+    actions = ('score', )
+
+    def score(self, request, queryset):
+        for s in queryset:
+            s.run_scoring()
 
 
 @admin.register(SubmitScore)

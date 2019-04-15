@@ -37,7 +37,7 @@ class CodeSubmitAPIView(AuthorizedApiView):
         transaction.on_commit(lambda: submit.run_scoring())
 
         return JsonResponse(
-            {'submit_id': submit.pk}
+            {'submit_id': submit.pk, 'task_name': submit.task.name}
         )
 
 

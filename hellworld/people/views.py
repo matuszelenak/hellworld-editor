@@ -7,7 +7,7 @@ from django.views.generic import FormView, TemplateView
 
 from people.forms import LoginForm
 from people.models import BluetoothTag, Team
-from submit.models import Task, SubmitScore
+from submit.models import Task, SubmitScore, Submit
 
 
 class LoginView(FormView):
@@ -32,6 +32,8 @@ class LoginView(FormView):
 
 class LogoutView(View):
     def post(self, request):
+        print(request.body)
+        print(request.POST)
         if request.user and request.user.team:
             request.user.team.logged_in = None
             request.user.team.save()
@@ -60,5 +62,13 @@ class ScoreboardView(TemplateView):
                     submit__task=task).order_by('-points').first()
                 if best_task_score:
                     team_points += best_task_score.points
-            data['team_scores'][team.name] = team_points
+
+            solved = set([
+                submit.task.name for submit in Submit.objects.filter(participant__team=team, status=Submit.STATUS_OK)
+            ])
+            data['team_scores'][team.name] = {
+                'points': team_points,
+                'solved': solved,
+                'money': team.resources
+             }
         return data

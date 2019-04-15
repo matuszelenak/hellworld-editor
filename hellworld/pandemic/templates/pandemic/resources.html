@@ -11,26 +11,23 @@
     <script src="{% static "pandemic/jquery.min.js" %}"></script>
     <script src="{% static "pandemic/popper.min.js" %}"></script>
     <script src="{% static "pandemic/bootstrap.min.js" %}"></script>
-    <script type="text/javascript">
-        setInterval(() => {
-            location.reload();
-
-        }, 100000)
-    </script>
 </head>
 <body>
     <div class="container">
-        {% for team_name, score_data in team_scores.items %}
+        {% for team in teams %}
             <div class="row">
-                <div class="col-md-2"><h2>{{ team_name }}</h2></div>
-                <div class="col-md-2"><h2>{{ score_data.points }} points</h2></div>
-                <div class="col-md-2"><h2>${{ score_data.money }}</h2></div>
-                <div class="col-md-6">
-                <h2>
-                {% for task in score_data.solved %}
-                    {{task}},
-                {% endfor %}
-                </h2>
+                <div class="col-md-4">
+                    <h2>{{ team.name }}</h2>
+                </div>
+                <div class="col-md-4">
+                    <h2>${{ team.resources }}</h2>
+                </div>
+
+                <div class="col-md-4">
+                    <form method="POST" action="{% url "pandemic:add_resources" team.pk %}">
+                        <input type="number" value="0" name="resource">
+                        <input type="submit" class="btn btn-info" value="Add">
+                    </form>
                 </div>
             </div>
         {% endfor %}
