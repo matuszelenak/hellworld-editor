@@ -67,7 +67,7 @@ class Submit(models.Model):
 class SubmitScore(models.Model):
 
     submit = models.ForeignKey('submit.Submit', related_name='scores', on_delete=models.CASCADE)
-    compilation_message = models.TextField()
+    compilation_message = models.TextField(default='')
     log_file = models.FileField(upload_to='scoring_logs')
     points = models.IntegerField(default=0)
-    date_scored = models.DateTimeField(auto_now_add=True)
+    date_scored = models.DateTimeField(auto_now_add=True, null=True)

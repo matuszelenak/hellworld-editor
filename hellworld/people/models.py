@@ -30,7 +30,7 @@ class BluetoothTag(models.Model):
 
 class MedicineSupply(models.Model):
     amount = models.IntegerField(default=0)
-    team = models.ForeignKey('people.Team', related_name='medicine_supplies', on_delete=models.CASCADE)
+    team = models.ForeignKey('people.Team', related_name='medicine_supplies', on_delete=models.CASCADE, null=True)
     medicine = models.ForeignKey('pandemic.MedicineClass', related_name='participant_supplies', on_delete=models.CASCADE)
 
     def __str__(self):

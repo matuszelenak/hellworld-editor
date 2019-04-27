@@ -1,5 +1,25 @@
 [
   {
+    "model": "people.participant",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$150000$vB2CVz3RAYX1$rFHBqre81sMqWJ032ukOLG2X/Gg8x+GmcLlE9QFgtqc=",
+        "last_login": null,
+        "is_superuser": true,
+        "username": "matuszelenak",
+        "first_name": "",
+        "last_name": "",
+        "email": "matus@ksp.sk",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2019-04-27T20:23:35.111Z",
+        "team": null,
+        "is_organiser": true,
+        "groups": [],
+        "user_permissions": []
+    }
+  },
+  {
     "model": "people.bluetoothtag",
     "pk": 1,
     "fields": {
