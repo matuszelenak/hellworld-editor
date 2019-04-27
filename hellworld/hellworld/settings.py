@@ -25,7 +25,7 @@ SECRET_KEY = 'y0fv)2+iyhsmt!qedm)7^%i*pnvi38v$4fsafdh+2kt3i0p-ux'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'hellworld.top', '20.20.1.128']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'hellworld.top', '20.20.1.128', '0.0.0.0']
 
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
@@ -110,6 +110,13 @@ DATABASES = {
         'PORT': 5432
     }
 }
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators

@@ -1,8 +1,6 @@
-hellworld/db.sqlite3
 venv
 .idea
 napady.txt
-bluetooth-proximity
 __pycache__/
 hellworld/staticfiles
 hellworld/media/
