@@ -4,4 +4,4 @@ python manage.py migrate
 python manage.py loaddata initial
 python manage.py collectstatic
 
-gunicorn --bind 0.0.0.0:$PORT hellworld.wsgi --log-level DEBUG --access-logfile - --log-file -
+gunicorn --bind 0.0.0.0:$PORT hellworld.wsgi --env DJANGO_SETTINGS_MODULE=hellworld.settings.production --log-level DEBUG --access-logfile - --log-file -
