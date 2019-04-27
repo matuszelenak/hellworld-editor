@@ -3,7 +3,7 @@ import django_heroku
 
 from .base import *
 
-DEBUG = False
+DEBUG = True
 
 BROKER_URL = os.environ.get('REDIS_URL')
 CELERY_BROKER_URL = os.environ.get('REDIS_URL')
