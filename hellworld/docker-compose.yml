@@ -18,8 +18,7 @@ services:
       - db
       - redis
       - celery
-    environment:
-      - DJANGO_SETTINGS_MODULE=hellworld.settings
+    command: python manage.py runserver 0.0.0.0:8000
   redis:
     image: redis:latest
     ports:
