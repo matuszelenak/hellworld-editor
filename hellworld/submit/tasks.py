@@ -8,8 +8,8 @@ from celery.task import Task
 from django.core.files.base import ContentFile
 
 from django.db import transaction
+from django.conf import settings
 
-from hellworld import settings
 from submit.models import Submit, SubmitScore
 
 
