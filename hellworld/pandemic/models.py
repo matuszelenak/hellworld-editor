@@ -32,7 +32,7 @@ class DiseaseInstance(models.Model):
 
 class DiseaseTransmit(models.Model):
     disease = models.ForeignKey('pandemic.DiseaseClass', related_name='transmissions', on_delete=models.CASCADE)
-    tag = models.ForeignKey('people.BluetoothTag', related_name='transmissions', on_delete=models.CASCADE)
+    tag = models.ForeignKey('people.BluetoothTag', related_name='transmissions', on_delete=models.CASCADE, null=True)
     severity = models.IntegerField(null=False)
 
     def __str__(self):

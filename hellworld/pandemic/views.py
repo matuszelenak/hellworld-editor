@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views import View
 from django.views.generic import TemplateView
 
-from hellworld import settings
+from django.conf import settings
 from pandemic.models import DiseaseInstance, DiseaseTransmit, DiseaseClass, MedicineClass, MedicineEffect
 from pandemic.serializers import DiseaseInstanceSerializer
 from people.models import BluetoothTag, Team, MedicineSupply

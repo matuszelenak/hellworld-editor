@@ -1,9 +1,10 @@
 import os
 
+from django.conf import settings
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
-from hellworld import settings
+
 from submit.models import Task
 
 

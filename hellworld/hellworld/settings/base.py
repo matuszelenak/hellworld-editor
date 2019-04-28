@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
@@ -22,14 +22,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'y0fv)2+iyhsmt!qedm)7^%i*pnvi38v$4fsafdh+2kt3i0p-ux'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'hellworld.top', '0.0.0.0']
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'hellworld.top', '20.20.1.128']
-
-
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
 # Application definition
 
@@ -98,19 +92,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'hellworld.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hellworld',
-        'USER': 'hellworld',
-        'HOST': 'db',
-        'PORT': 5432
-    }
-}
-
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 
@@ -146,26 +127,12 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.1/howto/static-files/
-
-STATIC_URL = '/static/'
-
 LOGIN_URL = '/people/login'
 
 LOGIN_REDIRECT_URL = '/pandemic/main/'
 
-# Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Task specific settings
+INPUT_PATH = 'task_inputs'
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash.
-# Examples: "http://example.com/media/", "http://media.example.com/"
-MEDIA_URL = '/media/'
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-COMPILED_BINARIES_PATH = os.path.join(MEDIA_ROOT, 'compiled')
-
-TASK_ROOT = os.path.join(MEDIA_ROOT, 'tasks')
+INPUTS_EXT = '.in'
+OUTPUTS_EXT = '.out'
