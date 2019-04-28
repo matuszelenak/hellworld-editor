@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import subprocess
 import uuid
@@ -13,6 +14,11 @@ from django.db import transaction
 from django.conf import settings
 
 from submit.models import Submit, SubmitScore
+
+
+logging.getLogger('boto3').setLevel(logging.WARNING)
+logging.getLogger('botocore').setLevel(logging.WARNING)
+logging.getLogger('nose').setLevel(logging.WARNING)
 
 
 class UpdateTaskInputs(Task):

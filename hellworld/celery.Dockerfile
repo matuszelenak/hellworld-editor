@@ -8,6 +8,8 @@ RUN apk add --no-cache --virtual build-deps curl gcc g++ make postgresql-dev bas
 
 RUN mkdir /hellworld
 
+RUN mkdir /task_inputs
+
 WORKDIR /hellworld
 
 ADD . /hellworld
