@@ -1,7 +1,11 @@
+from celery.schedules import crontab
+
 from .base import *
 
 
 DEBUG = True
+
+PRODUCTION = False
 
 DATABASES = {
     'default': {
@@ -15,6 +19,13 @@ DATABASES = {
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    # 'update_inputs': {
+    #     'task': 'submit.tasks.UpdateTaskInputs',
+    #     'schedule': crontab()  # execute every minute
+    # }
+}
 
 STATIC_URL = '/static/'
 
@@ -30,4 +41,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 COMPILED_BINARIES_PATH = os.path.join(MEDIA_ROOT, 'compiled')
 
-TASK_ROOT = os.path.join(MEDIA_ROOT, 'tasks')
+AWS_ACCESS_KEY_ID = 'AKIAZL4EH7Q3YL7BQNGP'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'hellworld-editor'

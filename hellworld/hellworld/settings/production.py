@@ -4,6 +4,8 @@ from .base import *
 
 DEBUG = True
 
+PRODUCTION = True
+
 INSTALLED_APPS += ['storages']
 
 ALLOWED_HOSTS += ['hellworld-editor.herokuapp.com']

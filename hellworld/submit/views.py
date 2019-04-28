@@ -31,7 +31,7 @@ class CodeSubmitAPIView(AuthorizedApiView):
         submit.file.save('{id}{ext}'.format(
             id=str(uuid.uuid4()),
             ext=Submit.LANGUAGE_EXTENSIONS[submit.language]
-        ), ContentFile(code))
+        ), ContentFile(code.encode('utf-8')))
         submit.save()
 
         transaction.on_commit(lambda: submit.run_scoring())
