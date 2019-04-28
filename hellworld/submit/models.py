@@ -1,9 +1,11 @@
 from django.db import models
 
+from hellworld.storage_backends import PrivateMediaStorage
+
 
 class Task(models.Model):
     name = models.CharField(max_length=100, null=False)
-    assignment = models.FileField(upload_to='tasks', null=True)
+    assignment = models.FileField(upload_to='task_assignments', null=True, storage=PrivateMediaStorage())
     max_points = models.IntegerField(null=False)
     time_limit = models.IntegerField(default=5000)
     memory_limit = models.IntegerField(default=5000)
@@ -48,7 +50,7 @@ class Submit(models.Model):
 
     participant = models.ForeignKey('people.Participant', related_name='submits', on_delete=models.CASCADE, null=True)
     task = models.ForeignKey('submit.Task', related_name='submits', on_delete=models.SET_NULL, null=True)
-    file = models.FileField(upload_to='submits')
+    file = models.FileField(upload_to='submits', storage=PrivateMediaStorage())
     language = models.IntegerField(choices=LANGUAGE_CHOICES, null=False)
 
     scoring_task_id = models.CharField(max_length=36, null=True, blank=True)
@@ -70,6 +72,6 @@ class SubmitScore(models.Model):
 
     submit = models.ForeignKey('submit.Submit', related_name='scores', on_delete=models.CASCADE)
     compilation_message = models.TextField(default='')
-    log_file = models.FileField(upload_to='scoring_logs')
+    log_file = models.FileField(upload_to='scoring_logs', storage=PrivateMediaStorage())
     points = models.IntegerField(default=0)
     date_scored = models.DateTimeField(auto_now_add=True, null=True)
