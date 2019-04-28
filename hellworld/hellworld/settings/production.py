@@ -1,5 +1,4 @@
 import dj_database_url
-import django_heroku
 
 from .base import *
 
@@ -34,5 +33,3 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 DATABASES = {'default': dj_database_url.config(default='postgres://localhost')}
-
-django_heroku.settings(locals())
