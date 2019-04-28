@@ -6,6 +6,8 @@ DEBUG = True
 
 INSTALLED_APPS += ['storages']
 
+ALLOWED_HOSTS += ['hellworld-editor.herokuapp.com']
+
 AWS_ACCESS_KEY_ID = 'AKIAZL4EH7Q3YL7BQNGP'
 AWS_SECRET_ACCESS_KEY = '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'
 AWS_STORAGE_BUCKET_NAME = 'hellworld-editor'
