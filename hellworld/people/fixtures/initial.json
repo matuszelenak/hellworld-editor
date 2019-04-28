@@ -20,6 +20,26 @@
     }
   },
   {
+      "model": "people.participant",
+      "pk": 2,
+      "fields": {
+          "password": "pbkdf2_sha256$150000$3unJUw2UZ2rz$w+WCPyWeBVBnvAUGtTkCB5AhMpqpPe+fBukhGjuRUuQ=",
+          "last_login": null,
+          "is_superuser": true,
+          "username": "andrejskok",
+          "first_name": "",
+          "last_name": "",
+          "email": "andrej.skok@vacuumlabs.com",
+          "is_staff": false,
+          "is_active": true,
+          "date_joined": "2019-04-28T20:37:05.926Z",
+          "team": null,
+          "is_organiser": false,
+          "groups": [],
+          "user_permissions": []
+      }
+  },
+  {
     "model": "people.bluetoothtag",
     "pk": 1,
     "fields": {
