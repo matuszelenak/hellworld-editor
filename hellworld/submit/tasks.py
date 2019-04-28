@@ -117,6 +117,10 @@ class ScoringTask(Task):
         submit.scoring_task_id = None
         submit.save()
 
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        super().on_failure(exc, task_id, args, kwargs, einfo)
+        Submit.objects.filter(pk=kwargs['submit_pk']).update(status=Submit.STATUS_SCORING_FAILED)
+
 
 class PythonScoringTask(ScoringTask):
     def compile(self, submit):

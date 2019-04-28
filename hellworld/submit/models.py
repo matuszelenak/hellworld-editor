@@ -20,6 +20,7 @@ class Submit(models.Model):
     STATUS_COMPILATION_ERROR = 4
     STATUS_RUNTIME_EXCEPTION = 5
     STATUS_TIME_LIMIT_EXCEEDED = 6
+    STATUS_SCORING_FAILED = 7
 
     STATUS_CHOICES = (
         (STATUS_WAITING, 'Waiting'),
@@ -28,7 +29,8 @@ class Submit(models.Model):
         (STATUS_WA, 'WA'),
         (STATUS_COMPILATION_ERROR, 'Compilation error'),
         (STATUS_RUNTIME_EXCEPTION, 'Runtime exception'),
-        (STATUS_TIME_LIMIT_EXCEEDED, 'Time limit exceeded')
+        (STATUS_TIME_LIMIT_EXCEEDED, 'Time limit exceeded'),
+        (STATUS_SCORING_FAILED, 'Scoring of the submit failed')
     )
 
     LANGUAGE_PYTHON = 0
@@ -60,7 +62,7 @@ class Submit(models.Model):
             scoring_task_cls = CppScoringTask
 
         self.status = self.STATUS_WAITING
-        self.scoring_task_id = scoring_task_cls().delay(self.pk).task_id
+        self.scoring_task_id = scoring_task_cls().delay(submit_pk=self.pk).task_id
         self.save()
 
 
