@@ -3,4 +3,4 @@ build:
     celery: hellworld/celery.Dockerfile
     web: hellworld/web.Dockerfile
 run:
-  celery: celery -A hellworld worker -l debug
+  celery: celery -A hellworld worker -l info
