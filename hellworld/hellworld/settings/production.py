@@ -39,3 +39,4 @@ CELERY_TIMEZONE = 'UTC'
 DATABASES = {'default': dj_database_url.config(default='postgres://localhost')}
 
 ADMINS = [('Matúš Zeleňák', 'matus.zelenak.gjh@gmail.com')]
+SERVER_EMAIL = 'hellworld@heroku.com'
