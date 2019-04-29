@@ -37,3 +37,5 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 DATABASES = {'default': dj_database_url.config(default='postgres://localhost')}
+
+ADMINS = [('Matúš Zeleňák', 'matus.zelenak.gjh@gmail.com')]
