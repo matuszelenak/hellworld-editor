@@ -19,7 +19,7 @@ from django.http import HttpResponseRedirect
 from django.urls import path, include
 
 urlpatterns = [
-    url(r'^$', lambda x: HttpResponseRedirect('pandemic/main/')),
+    url(r'^$', lambda x: HttpResponseRedirect('pandemic/')),
     path('admin/', admin.site.urls),
     path('submit/', include('submit.urls')),
     path('pandemic/', include('pandemic.urls')),

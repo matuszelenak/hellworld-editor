@@ -15,7 +15,7 @@ class LoginView(FormView):
     template_name = 'people/login.html'
 
     def get_success_url(self):
-        return reverse('pandemic:editor_main')
+        return reverse('pandemic:editor')
 
     def form_valid(self, form):
         user = authenticate(self.request, username=form.cleaned_data['username'], password=form.cleaned_data['password'])

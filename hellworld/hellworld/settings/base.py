@@ -129,7 +129,7 @@ USE_TZ = True
 
 LOGIN_URL = '/people/login'
 
-LOGIN_REDIRECT_URL = '/pandemic/main/'
+LOGIN_REDIRECT_URL = '/pandemic/'
 
 # Task specific settings
 INPUT_PATH = 'task_inputs'

@@ -14,14 +14,9 @@
     <script src="{% static "pandemic/bootstrap.min.js" %}"></script>
     <script src="{% static "pandemic/howler.min.js" %}"></script>
     <script type="text/javascript">
-        let logout_link = "{% url 'people:logout' %}";
-        let task_pdf_link = "{% url 'submit:task_assignment' 1 %}";
-        let code_submit_url = "{% url 'submit:code_submit' %}";
-        let submit_status_url = "{% url 'submit:submit_status' 4247 %}";
-        let active_diseases_url = "{% url 'pandemic:active_diseases' %}";
-        let rules_url = "{% url 'pandemic:rules' %}";
         let balance = {{ balance }};
         let csrftoken = "{{ csrf_token }}";
+
     </script>
 </head>
 <body style="background-color: #555555;">
@@ -49,13 +44,16 @@
     <div id="editor-container" class="row">
         <div class="col-md-8">
             <div id="editor-toolbar" class="row">
-                <label for="task-selector">Task selection</label><select id="task-selector">
+                <form method="post" action="{% url "people:logout" %}" class="logout-form">
+                    <input class="btn btn-danger" type="submit" value="Logout" />
+                </form>
+                <select id="task-selector">
                     {% for task in tasks %}
                         <option value="{{ task.pk }}" style="background-color: green;">{{ task.name }} ({{ task.points }}b)</option>
                     {% endfor %}
                 </select>
                 <button type="button" class="btn btn-info" data-toggle="modal" data-target="#assignment-modal">Task assignment</button>
-                <label for="language-selector">Language selection</label><select id="language-selector">
+                <select id="language-selector">
                     {% for value, key in submit_cls.LANGUAGE_CHOICES %}
                         <option value={{ value }}>{{ key }}</option>
                     {% endfor %}
@@ -73,12 +71,6 @@
 
         </div>
         <div class="col-md-4">
-            <div class="row">
-
-                <form method="post" action="{% url "people:logout" %}" class="logout-form">
-                    <input class="btn btn-danger" type="submit" value="Logout" />
-                </form>
-            </div>
             <div class="row">
                 <h2>Your submits</h2>
                 <div id="submit-history" class="col-md-12">
@@ -240,10 +232,17 @@ $( document ).ready(function() {
     let parkinson = new Parkinson(0);
 
     class ADHD extends Disease {
+        constructor(intensity){
+            super(intensity);
+            getJson("{% url "pandemic:adhd_images" %}", (data) => {
+                this.image_paths = data;
+            });
+        }
+
         activateEffect(){
             super.activateEffect();
             $('#editor-window').hide();
-            $("#adhd-img").attr("src", "{% url "pandemic:adhd" %}" + "?" + new Date().getTime());
+            $("#adhd-img").attr("src", this.image_paths[Math.floor(Math.random()*this.image_paths.length)]);
             $('#dummy-editor-window').show();
         }
         removeEffect(){
@@ -290,7 +289,7 @@ $( document ).ready(function() {
             super.activateEffect();
             $('#sleep-overlay').addClass('dimmer');
             var sound = new Howl({
-                src: ["{% url "pandemic:yawn" %}"],
+                src: ["{% static "pandemic/sound/yawn.wav" %}"],
                 format: ['mp3'],
                 volume: 0.5,
                 onend: function() {
@@ -335,7 +334,7 @@ $( document ).ready(function() {
             super.activateEffect();
             this.opacity = 100;
             var sound = new Howl({
-                src: ["{% url "pandemic:sneeze" %}"],
+                src: ["{% static "pandemic/sound/sneeze.wav" %}"],
                 format: ['mp3'],
                 volume: 0.5,
                 onend: function() {
@@ -344,7 +343,7 @@ $( document ).ready(function() {
             });
             sound.play();
             this.i = setInterval(() => {
-                let url = "{% url "pandemic:flu" %}" + "?" + new Date().getTime();
+                let url = "{% static "pandemic/img/snot2.png" %}";
                 $('#flu-overlay').addClass('flu-snot');
                 $('#flu-overlay').css('background-image', 'url(' + url + ')');
                 $('#flu-overlay').css('opacity', this.opacity);
@@ -671,7 +670,7 @@ $( document ).ready(function() {
         }
 
         purchaseMedicine(event){
-            let url = "{% url "pandemic:buy_medicine" %}";
+            let url = "{% url "pandemic:medicine_purchase" %}";
             postJson(url, {medicine_pk: $(event.currentTarget).data('medicine_pk')}, (data) => {
                 this.balance = data.balance;
                 this.updateMedicine();
@@ -680,14 +679,14 @@ $( document ).ready(function() {
         }
 
         useMedicine(event){
-            let url = "{% url "pandemic:thefuck" %}";
+            let url = "{% url "pandemic:medicine_inventory" %}";
             postJson(url, {medicine_pk: $(event.currentTarget).data('medicine_pk')}, (data) => {
                 if (!data.message) this.render(data);
             });
         }
 
         updateMedicine(){
-            getJson("{% url "pandemic:thefuck" %}", (data) => {
+            getJson("{% url "pandemic:medicine_inventory" %}", (data) => {
                 this.render(data);
             });
         }
@@ -695,7 +694,7 @@ $( document ).ready(function() {
 
     class SubmitHistory {
         constructor(){
-            this.container = $('#submit-history')
+            this.container = $('#submit-history');
             this.submits = []
         }
 

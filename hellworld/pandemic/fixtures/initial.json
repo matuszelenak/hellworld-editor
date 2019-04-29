@@ -1,0 +1,242 @@
+[
+{
+    "model": "pandemic.diseaseclass",
+    "pk": 1,
+    "fields": {
+        "name": "Shortsightedness",
+        "description": "Makes your vision blurry",
+        "type": 1
+    }
+},
+{
+    "model": "pandemic.diseaseclass",
+    "pk": 2,
+    "fields": {
+        "name": "Parkinson",
+        "description": "You miss key strokes",
+        "type": 1
+    }
+},
+{
+    "model": "pandemic.diseaseclass",
+    "pk": 3,
+    "fields": {
+        "name": "ADHD",
+        "description": "You get distracted by memes",
+        "type": 1
+    }
+},
+{
+    "model": "pandemic.diseaseclass",
+    "pk": 4,
+    "fields": {
+        "name": "Stutter",
+        "description": "Sometimes you type a key more than once",
+        "type": 1
+    }
+},
+{
+    "model": "pandemic.diseaseclass",
+    "pk": 5,
+    "fields": {
+        "name": "Sleeping",
+        "description": "You fall asleep",
+        "type": 1
+    }
+},
+{
+    "model": "pandemic.diseaseclass",
+    "pk": 6,
+    "fields": {
+        "name": "Flu",
+        "description": "You sneeze",
+        "type": 0
+    }
+},
+{
+    "model": "pandemic.diseaseinstance",
+    "pk": 1,
+    "fields": {
+        "disease": 1,
+        "team": 1,
+        "effect_duration": 20,
+        "cooldown_duration": 15,
+        "severity": 100
+    }
+},
+{
+    "model": "pandemic.diseaseinstance",
+    "pk": 2,
+    "fields": {
+        "disease": 3,
+        "team": 1,
+        "effect_duration": 5,
+        "cooldown_duration": 15,
+        "severity": 100
+    }
+},
+{
+    "model": "pandemic.diseaseinstance",
+    "pk": 3,
+    "fields": {
+        "disease": 6,
+        "team": 1,
+        "effect_duration": 7,
+        "cooldown_duration": 30,
+        "severity": 100
+    }
+},
+{
+    "model": "pandemic.diseaseinstance",
+    "pk": 4,
+    "fields": {
+        "disease": 5,
+        "team": 1,
+        "effect_duration": 8,
+        "cooldown_duration": 30,
+        "severity": 100
+    }
+},
+{
+    "model": "pandemic.diseaseinstance",
+    "pk": 5,
+    "fields": {
+        "disease": 2,
+        "team": 1,
+        "effect_duration": 15,
+        "cooldown_duration": 15,
+        "severity": 100
+    }
+},
+{
+    "model": "pandemic.diseaseinstance",
+    "pk": 6,
+    "fields": {
+        "disease": 4,
+        "team": 1,
+        "effect_duration": 20,
+        "cooldown_duration": 20,
+        "severity": 100
+    }
+},
+{
+    "model": "pandemic.medicineclass",
+    "pk": 1,
+    "fields": {
+        "price": 5,
+        "name": "Celaskon",
+        "description": "Relieves flu"
+    }
+},
+{
+    "model": "pandemic.medicineclass",
+    "pk": 2,
+    "fields": {
+        "price": 5,
+        "name": "Coffee",
+        "description": "You stay up longer"
+    }
+},
+{
+    "model": "pandemic.medicineclass",
+    "pk": 3,
+    "fields": {
+        "price": 5,
+        "name": "AntiDanko",
+        "description": "You don't stutter as much"
+    }
+},
+{
+    "model": "pandemic.medicineclass",
+    "pk": 4,
+    "fields": {
+        "price": 5,
+        "name": "Dark chocolate",
+        "description": "You retain focus"
+    }
+},
+{
+    "model": "pandemic.medicineclass",
+    "pk": 5,
+    "fields": {
+        "price": 5,
+        "name": "Dopamine",
+        "description": "Relieves parkinson"
+    }
+},
+{
+    "model": "pandemic.medicineclass",
+    "pk": 6,
+    "fields": {
+        "price": 5,
+        "name": "Eye drops",
+        "description": "You see better"
+    }
+},
+{
+    "model": "pandemic.medicineeffect",
+    "pk": 1,
+    "fields": {
+        "medicine": 1,
+        "disease": 6,
+        "severity_multiplier": 0.75,
+        "effect_multiplier": 0.75,
+        "cooldown_multiplier": 1.25
+    }
+},
+{
+    "model": "pandemic.medicineeffect",
+    "pk": 2,
+    "fields": {
+        "medicine": 2,
+        "disease": 5,
+        "severity_multiplier": 0.75,
+        "effect_multiplier": 0.75,
+        "cooldown_multiplier": 1.25
+    }
+},
+{
+    "model": "pandemic.medicineeffect",
+    "pk": 3,
+    "fields": {
+        "medicine": 3,
+        "disease": 4,
+        "severity_multiplier": 0.75,
+        "effect_multiplier": 0.75,
+        "cooldown_multiplier": 1.25
+    }
+},
+{
+    "model": "pandemic.medicineeffect",
+    "pk": 4,
+    "fields": {
+        "medicine": 4,
+        "disease": 3,
+        "severity_multiplier": 0.75,
+        "effect_multiplier": 0.75,
+        "cooldown_multiplier": 1.25
+    }
+},
+{
+    "model": "pandemic.medicineeffect",
+    "pk": 5,
+    "fields": {
+        "medicine": 5,
+        "disease": 2,
+        "severity_multiplier": 0.75,
+        "effect_multiplier": 0.75,
+        "cooldown_multiplier": 1.25
+    }
+},
+{
+    "model": "pandemic.medicineeffect",
+    "pk": 6,
+    "fields": {
+        "medicine": 6,
+        "disease": 1,
+        "severity_multiplier": 0.75,
+        "effect_multiplier": 0.75,
+        "cooldown_multiplier": 1.25
+    }
+}
+]
