@@ -146,7 +146,6 @@
     "pk": 1,
     "fields": {
         "name": "Testing team",
-        "logged_in": 1,
         "resources": 200
     }
 }

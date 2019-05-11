@@ -5,7 +5,7 @@ from hellworld.storage_backends import PrivateMediaStorage
 
 
 class Task(models.Model):
-    name = models.CharField(max_length=100, null=False)
+    name = models.CharField(max_length=100, null=False, unique=True)
     assignment = models.FileField(upload_to='task_assignments', null=True, storage=PrivateMediaStorage() if settings.PRODUCTION else None)
     max_points = models.IntegerField(null=False)
     time_limit = models.IntegerField(default=5000)

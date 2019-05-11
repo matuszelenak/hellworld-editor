@@ -4,8 +4,7 @@ from django.contrib.auth.models import User, PermissionsMixin, AbstractUser
 
 
 class Team(models.Model):
-    name = models.CharField(max_length=40, null=False)
-    logged_in = models.OneToOneField('people.Participant', on_delete=models.SET_NULL, null=True, related_name='+')
+    name = models.CharField(max_length=40, null=False, unique=True)
     resources = models.IntegerField(default=0)
 
     def __str__(self):
@@ -21,7 +20,7 @@ class Participant(AbstractUser):
 
 
 class BluetoothTag(models.Model):
-    address = models.TextField(null=False)
+    address = models.TextField(null=False, unique=True)
     team = models.ForeignKey('people.Team', related_name='tags', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
@@ -35,3 +34,6 @@ class MedicineSupply(models.Model):
 
     def __str__(self):
         return f'{self.team} has {self.medicine}'
+
+    class Meta:
+        unique_together = [['medicine', 'team']]

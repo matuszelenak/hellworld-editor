@@ -2,17 +2,8 @@ from django.db import models
 
 
 class DiseaseClass(models.Model):
-    TYPE_INFECTIOUS = 0
-    TYPE_DEGENERATIVE = 1
-
-    TYPES = (
-        (TYPE_INFECTIOUS, 'Infectious'),
-        (TYPE_DEGENERATIVE, 'Degenerative')
-    )
-
-    name = models.TextField(null=False)
+    name = models.TextField(null=False, unique=True)
     description = models.TextField()
-    type = models.IntegerField(choices=TYPES)
 
     def __str__(self):
         return self.name
@@ -29,6 +20,9 @@ class DiseaseInstance(models.Model):
     def __str__(self):
         return f'{str(self.disease)} on {str(self.team)}'
 
+    class Meta:
+        unique_together = [['disease', 'team']]
+
 
 class DiseaseTransmit(models.Model):
     disease = models.ForeignKey('pandemic.DiseaseClass', related_name='transmissions', on_delete=models.CASCADE)
@@ -38,10 +32,13 @@ class DiseaseTransmit(models.Model):
     def __str__(self):
         return f'{str(self.tag)} carries {str(self.disease)}'
 
+    class Meta:
+        unique_together = [['disease', 'tag']]
+
 
 class MedicineClass(models.Model):
     price = models.IntegerField(default=5)
-    name = models.TextField(null=False)
+    name = models.TextField(null=False, unique=True)
     description = models.TextField()
 
     def __str__(self):
@@ -58,3 +55,6 @@ class MedicineEffect(models.Model):
 
     def __str__(self):
         return str(self.medicine) + ' works on ' + str(self.disease)
+
+    class Meta:
+        unique_together = [['medicine', 'disease']]

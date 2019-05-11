@@ -120,9 +120,7 @@ class BluetoothTagSubmitView(View):
         if not ('address' in content and 'target' in content):
             return HttpResponseBadRequest()
 
-        tag = BluetoothTag.objects.select_for_update().filter(address=content['address']).first()
-        if not tag:
-            raise Http404()
+        tag = get_object_or_404(BluetoothTag, address=content['address'])
         target_team = get_object_or_404(Team, pk=content['target'])
 
         transmits = DiseaseTransmit.objects.filter(tag=tag)

@@ -3,8 +3,8 @@ from bluepy.btle import Scanner
 import requests
 import os
 
-QUERY_URL = 'http://hellworld.top:8000/people/tags'
-SUBMIT_URL = 'http://hellworld.top:8000/pandemic/bluetooth_tag/'
+QUERY_URL = 'https://hellworld-editor.herokuapp.com/people/tags'
+SUBMIT_URL = 'https://hellworld-editor.herokuapp.com/pandemic/bluetooth_tag/'
 
 DEFAULT_RSSI = -100
 HISTORY_LENGTH = 3

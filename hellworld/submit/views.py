@@ -43,6 +43,7 @@ class CodeSubmitAPIView(AuthorizedApiView):
 
 class SubmitStatusRequestView(AuthorizedApiView):
 
+    @transaction.atomic
     def get(self, request, submit_pk, *args, **kwargs):
         submit = Submit.objects.get(pk=submit_pk)
 
@@ -55,11 +56,10 @@ class SubmitStatusRequestView(AuthorizedApiView):
 
 class TaskAssignmentAPIView(AuthorizedApiView):
 
-    def get(self, request, *args, **kwargs):
-        task = get_object_or_404(Task, pk=kwargs['task_pk'])
+    def get(self, request, task_pk, *args, **kwargs):
+        task = get_object_or_404(Task, pk=kwargs[task_pk])
         if not task.assignment:
             return Http404()
 
         response = HttpResponse(task.assignment, content_type='application/pdf')
-
         return response

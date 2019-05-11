@@ -1,4 +1,3 @@
-from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from submit.models import Submit
@@ -20,9 +19,7 @@ class SubmitCreateSerializer(serializers.ModelSerializer):
 
 class SubmitSerializer(serializers.ModelSerializer):
 
-
     class Meta:
         model = Submit
         fields = ('participant', 'task', 'status',)
         depth = 2
-
