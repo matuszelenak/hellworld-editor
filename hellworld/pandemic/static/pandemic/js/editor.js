@@ -19,11 +19,9 @@ $( document ).ready(function() {
             this.handleCharClick = this.handleCharClick.bind(this);
             this.parent = parent;
             this.position = pos;
-            this.cursor_position = 0;
             this.html = $('<div/>')
                 .addClass('editor-row')
-                .attr('tabindex', "0")
-                .keydown(this.handleKeyDown.bind(this));
+                .attr('tabindex', "0");
             this.content = content.split('');
             this.buildCharacters();
             this.html.focus();
@@ -58,9 +56,21 @@ $( document ).ready(function() {
             this.buildCharacters();
         }
 
-        setCursorPosition(position){
-            this.cursor_position = position;
-            setCursor(this.characters[this.cursor_position]);
+        insertCharacter(c, position){
+            this.content.splice(position, 0, c);
+            this.buildCharacters();
+        }
+
+        removeCharacter(position){
+            this.content.splice(position -1, 1);
+            this.buildCharacters();
+        }
+
+        splitAfter(position){
+            let remainder = this.getContent().slice(position);
+            this.content = this.content.slice(0, position);
+            this.buildCharacters();
+            return remainder;
         }
 
         getContent(){
@@ -71,62 +81,16 @@ $( document ).ready(function() {
             )
         }
 
-        handleKeyDown(e){
-            console.log(e.keyCode, e.key);
-            switch (e.keyCode) {
-                case 13: {
-                    let remainder = this.getContent().slice(this.cursor_position);
-                    this.content = this.content.slice(0, this.cursor_position);
-                    this.buildCharacters();
-                    this.parent.newLine(this.position, remainder);
-                    break;
-                }
-                case 8: {
-                    if (this.cursor_position === 0){
-                        this.parent.removeLine(this.position, this.content.slice(this.cursor_position));
-                    } else {
-                        this.content.splice(this.cursor_position -1, 1);
-                        this.buildCharacters();
-                        this.cursor_position--;
-                        setCursor(this.characters[this.cursor_position]);
-                    }
-                    break
-                }
-                case 37: {
-                    this.cursor_position = Math.max(this.cursor_position - 1, 0);
-                    setCursor(this.characters[this.cursor_position]);
-                    break
-                }
-                case 39: {
-                    this.cursor_position = Math.min(this.cursor_position + 1, this.content.length);
-                    setCursor(this.characters[this.cursor_position]);
-                    break
-                }
-                default: {
-                    if ([16, 17, 18, 20, 46, 9, 38, 40].includes(e.keyCode)) break;
-
-                    let mangled_key = diseases['Parkinson'].mangleKey(e.key);
-                    for (var i = 0; i < diseases['Stutter'].getRepeats(); i++){
-                        this.content.splice(this.cursor_position, 0, mangled_key);
-                        this.buildCharacters();
-                        this.cursor_position ++;
-                    }
-                    setCursor(this.characters[this.cursor_position]);
-                }
-            }
-        }
-
         handleCharClick(e){
             e.preventDefault();
-            this.cursor_position = $(event.currentTarget).data('position');
-            setCursor(this.characters[this.cursor_position]);
+            this.parent.setCursorPosition(this.position, $(event.currentTarget).data('position'));
         }
     }
 
     class EditorWindow {
         constructor(){
             this.html = $('#editor-window');
-            this.cursor_blink = setInterval(() => {
+            setInterval(() => {
                 if (editor.cursored_element){
                     if (!editor.cursored_element.hasClass('editor-char-cursor')){
                         editor.cursored_element.addClass('editor-char-cursor');
@@ -135,7 +99,9 @@ $( document ).ready(function() {
                     }
                 }
             }, 500);
-            this.html.keydown(() => {console.log('Key pressed')});
+            this.html.keydown(this.handleKeyDown.bind(this));
+            this.selectedRowIndex = 0;
+            this.selectedColumnIndex = 0;
         }
 
         setContent(content){
@@ -156,12 +122,10 @@ $( document ).ready(function() {
                 });
                 this.rows.splice(position, 1);
                 this.html.children().slice(position, position + 1).remove();
-                let prev_line_len = this.rows[position - 1].content.length;
+                let prev_line_len = this.rows[position -1].content.length;
                 this.rows[position - 1].append(remainder);
-                this.rows[position - 1].setCursorPosition(prev_line_len);
-                this.rows[position - 1].html.focus()
+                this.setCursorPosition(position - 1, prev_line_len);
             }
-
         }
 
         newLine(position, content){
@@ -171,17 +135,70 @@ $( document ).ready(function() {
             let new_row = new EditorRow(content, position + 1, this);
             this.rows.splice(position + 1, 0, new_row);
             $("#editor-window > div:nth-child(" + (position + 1) + ")").after(new_row.html);
-            setCursor(new_row.html.children().first());
-            new_row.html.children().first().focus()
         }
 
         getContent(){
-            let c = this.rows.reduce(
-                (acc, row) => {
-                    return acc + row.getContent() + '\n'
-                }, ''
-            );
+            let c = this.rows.reduce((acc, row) => { return acc + row.getContent() + '\n' }, '');
             return c.slice(0, c.length - 1);
+        }
+
+        handleKeyDown(e){
+            console.log(e.keyCode, e.key);
+            switch (e.keyCode) {
+                case 13: {
+                    let remainder = this.rows[this.selectedRowIndex].splitAfter(this.selectedColumnIndex);
+                    this.newLine(this.selectedRowIndex, remainder);
+                    this.setCursorPosition(this.selectedRowIndex + 1, 0);
+                    break;
+                }
+                case 8: {
+                    if (this.selectedColumnIndex === 0){
+                        this.removeLine(this.selectedRowIndex, this.rows[this.selectedRowIndex].content.slice(this.cursor_position));
+                    } else {
+                        this.rows[this.selectedRowIndex].removeCharacter(this.selectedColumnIndex);
+                        this.moveCursorPosition(-1, 0)
+                    }
+                    break
+                }
+                case 37: {
+                    this.moveCursorPosition(-1, 0);
+                    break
+                }
+                case 38: {
+                    this.moveCursorPosition(0, -1);
+                    break
+                }
+                case 39: {
+                    this.moveCursorPosition(+1, 0);
+                    break
+                }
+                case 40: {
+                    this.moveCursorPosition(0, +1);
+                    break
+                }
+                default: {
+                    if ([16, 17, 18, 20, 46, 9, 38, 40, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123].includes(e.keyCode)) break;
+                    let mangled_key = diseases['Parkinson'].mangleKey(e.key);
+                    for (let i = 0; i < diseases['Stutter'].getRepeats(); i++){
+                        this.rows[this.selectedRowIndex].insertCharacter(mangled_key, this.selectedColumnIndex);
+                        this.moveCursorPosition(+1, 0);
+                    }
+                }
+            }
+        }
+
+        moveCursorPosition(deltaX, deltaY){
+            let newRowIndex = Math.min(this.selectedRowIndex + deltaY, this.rows.length - 1);
+            newRowIndex = Math.max(newRowIndex, 0);
+            let newColumnIndex = Math.min(this.selectedColumnIndex + deltaX, this.rows[newRowIndex].content.length);
+            newColumnIndex = Math.max(newColumnIndex, 0);
+            this.setCursorPosition(newRowIndex, newColumnIndex);
+        }
+
+        setCursorPosition(row_index, column_index){
+            this.selectedRowIndex = row_index;
+            this.selectedColumnIndex = column_index;
+            setCursor(this.rows[this.selectedRowIndex].characters[this.selectedColumnIndex]);
         }
     }
 
