@@ -56,18 +56,22 @@ class MedicineInventory(View):
 
     def get(self, request, *args, **kwargs):
         team = request.user.team
-        supplies = MedicineSupply.objects.filter(team=team)
+        supplies = MedicineSupply.objects.filter(team=team).order_by('medicine__name')
         return JsonResponse(
-            [
-                {
-                    'amount': s.amount,
-                    'medicine_name': s.medicine.name,
-                    'medicine_pk': s.medicine.pk,
-                    'price': s.medicine.price,
-                    'description': s.medicine.description
-                }
-                for s in supplies
-            ], safe=False
+            {
+                'balance': team.resources,
+                'meds': [
+                    {
+                        'amount': s.amount,
+                        'medicine_name': s.medicine.name,
+                        'medicine_pk': s.medicine.pk,
+                        'price': s.medicine.price,
+                        'description': s.medicine.description
+                    }
+                    for s in supplies
+                ]
+            }
+            , safe=False
         )
 
 

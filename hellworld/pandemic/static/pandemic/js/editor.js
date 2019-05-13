@@ -265,7 +265,6 @@ $( document ).ready(function() {
                 () => this.updateMedicine(),
                 2000
             );
-            this.balance = 0;
             this.container = $('#medicine-inventory');
             this.useMedicine = this.useMedicine.bind(this);
             this.purchaseMedicine = this.purchaseMedicine.bind(this);
@@ -273,7 +272,7 @@ $( document ).ready(function() {
         }
 
         render(data){
-            let meds = data.map(
+            let meds = data['meds'].map(
                 (med) => {
                     return $('<div/>').addClass('row medicine-tab').append(
                         $('<div/>').addClass('col-lg medicine-purchase').append(
@@ -295,14 +294,13 @@ $( document ).ready(function() {
             );
             this.container.children().remove();
             this.container.append(
-                $('<h3/>').html('Current accout balance: $' + this.balance).css('text-align', 'center')
+                $('<h3/>').html('Current accout balance: $' + data['balance']).css('text-align', 'center')
             );
             this.container.append(meds);
         }
 
         purchaseMedicine(event){
             postJson(editor_urls['medicine_purchase'], {medicine_pk: $(event.currentTarget).data('medicine_pk')}, (data) => {
-                this.balance = data.balance;
                 this.updateMedicine();
                 editor.disease_panel.updateDiseases();
             });
