@@ -11,7 +11,7 @@
     color: white;
     margin: 5px;
     background: #245269;
-    padding-right: 50px;
+    padding: 5px;
 }
 
 #editor-toolbar > * {
@@ -75,24 +75,25 @@
 }
 
 .disease-tab {
-    text-align: center;
-    margin:2px;
+    border-style: solid;
+    border-width: 3px 3px 3px 3px;
+    border-color: transparent;
 }
 
 .disease-tab-active {
     border-style: solid;
-    margin: 0px;
-    border-width: 2px 2px 2px 2px;
+    border-width: 3px 3px 3px 3px;
     border-color: lawngreen;
-}
-
-.medicine-item> * {
-    margin: 10px;
 }
 
 .logout-form{
     display: inline;-
     float: right;
+}
+
+#submit-history {
+    height: 200px;
+    overflow-y: scroll;
 }
 
 .dimmer {
@@ -117,15 +118,29 @@
 }
 
 .submit-ok{
+    text-align: center;
     border-style: solid;
-    border-width: 2px 2px 2px 2px;
+    border-width: 3px 3px 3px 3px;
     border-color: lawngreen;
 }
 
 .submit-wrong{
+    text-align: center;
     border-style: solid;
-    border-width: 2px 2px 2px 2px;
+    border-width: 3px 3px 3px 3px;
     border-color: red;
+}
+
+.medicine-tab {
+    margin-bottom: 5px;
+}
+
+.medicine-usage {
+    text-align: left;
+}
+
+.medicine-purchase {
+    text-align: right;
 }
 
 img{

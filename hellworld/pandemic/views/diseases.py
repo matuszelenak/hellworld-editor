@@ -8,7 +8,7 @@ from pandemic.serializers import DiseaseInstanceSerializer
 
 class ActiveDiseaseInstancesView(View):
     def get(self, request, *args, **kwargs):
-        instances = DiseaseInstance.objects.select_related('disease', 'team').filter(team=request.user.team, severity__gt=0)
+        instances = DiseaseInstance.objects.select_related('disease', 'team').filter(team=request.user.team, severity__gt=0).order_by('disease__name')
         serializer = DiseaseInstanceSerializer(instances, many=True)
 
         return JsonResponse(serializer.data, safe=False)

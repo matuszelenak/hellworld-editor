@@ -25,6 +25,7 @@ class Disease {
 
     activateEffect(){
         this.active = true;
+        this.onStatusChange(this.name, this.active);
 
     }
     removeEffect(){

@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from pandemic.views.administration import ResourceView, DiseaseBalance
 from pandemic.views.diseases import ActiveDiseaseInstancesView, ADHDImagesPaths
-from pandemic.views.editor import EditorView, BluetoothTagSubmitView, CompetitionRules, MedicineInventory, PurchaseMedicine
+from pandemic.views.editor import EditorView, BluetoothTagSubmitView,  MedicineInventory, PurchaseMedicine
 
 app_name = 'pandemic'
 
@@ -12,7 +12,6 @@ urlpatterns = [
     # Editor
     url(r'^$', login_required(EditorView.as_view()), name='editor'),
     url(r'^bluetooth_tag/$', csrf_exempt(BluetoothTagSubmitView.as_view()), name='tag_submit'),
-    url(r'^rules/$', CompetitionRules.as_view(), name='rules'),
     url(r'^medicine/$', MedicineInventory.as_view(), name='medicine_inventory'),
     url(r'^buy_medicine/$', PurchaseMedicine.as_view(), name='medicine_purchase'),
 

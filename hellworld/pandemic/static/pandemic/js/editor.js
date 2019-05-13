@@ -105,7 +105,6 @@ $( document ).ready(function() {
         }
 
         setContent(content){
-            this.cursor_position = 0;
             this.rows = content.split('\n').map(
                 (c, i) => {
                     return new EditorRow(c, i, this)
@@ -143,6 +142,7 @@ $( document ).ready(function() {
         }
 
         handleKeyDown(e){
+            e.preventDefault();
             console.log(e.keyCode, e.key);
             switch (e.keyCode) {
                 case 13: {
@@ -153,7 +153,7 @@ $( document ).ready(function() {
                 }
                 case 8: {
                     if (this.selectedColumnIndex === 0){
-                        this.removeLine(this.selectedRowIndex, this.rows[this.selectedRowIndex].content.slice(this.cursor_position));
+                        this.removeLine(this.selectedRowIndex, this.rows[this.selectedRowIndex].content);
                     } else {
                         this.rows[this.selectedRowIndex].removeCharacter(this.selectedColumnIndex);
                         this.moveCursorPosition(-1, 0)
@@ -229,14 +229,11 @@ $( document ).ready(function() {
         render(){
             let disease_list = Object.entries(diseases).map(
                 ([disease_name, disease]) => {
-                    let stats = '(Cooldown ' + disease.cooldown_duration / 1000 + 's, effect '+ disease.effect_duration / 1000 + 's)';
-                    let el = $('<div/>')
-                        .html(disease_name + stats)
-                        .addClass('disease-tab');
-                    if (diseases[disease_name].active)
-                        el.addClass('disease-tab-active');
-                    this.disease_tabs[disease_name] = el;
-                    return el;
+                    return $('<div/>').addClass('row disease-tab').addClass(diseases[disease_name].active ? 'disease-tab-active' : '').append(
+                        $('<div/>').addClass('col-md').html(disease_name),
+                        $('<div/>').addClass('col-md').html('Cooldown ' + disease.cooldown_duration / 1000 + 's'),
+                        $('<div/>').addClass('col-md').html('Effect '+ disease.effect_duration / 1000 + 's)'),
+                    )
                 }
             );
             this.container.children().remove();
@@ -278,26 +275,27 @@ $( document ).ready(function() {
         render(data){
             let meds = data.map(
                 (med) => {
-                    return $('<div/>')
-                        .addClass('medicine-item')
-                        .append(
-                        $('<button/>')
-                            .data('medicine_pk', med.medicine_pk)
-                            .addClass('btn btn-info')
-                            .html('Use '+ med.medicine_name + '('+ med.amount +')')
-                            .click(this.useMedicine))
-                        .append(
-                        $('<button/>')
-                            .data('medicine_pk', med.medicine_pk)
-                            .addClass('btn btn-danger')
-                            .html('Purchase for $' + med.price)
-                            .click(this.purchaseMedicine)
-                        )
+                    return $('<div/>').addClass('row medicine-tab').append(
+                        $('<div/>').addClass('col-lg medicine-purchase').append(
+                            $('<button/>')
+                                .data('medicine_pk', med.medicine_pk)
+                                .addClass('btn btn-danger')
+                                .html('Purchase for $' + med.price)
+                                .click(this.purchaseMedicine)
+                        ),
+                        $('<div/>').addClass('col-lg medicine-usage').append(
+                            $('<button/>')
+                                .data('medicine_pk', med.medicine_pk)
+                                .addClass('btn btn-info')
+                                .html('Use '+ med.medicine_name + '('+ med.amount +')')
+                                .click(this.useMedicine)
+                        ),
+                    )
                 }
             );
             this.container.children().remove();
             this.container.append(
-                $('<h3/>').html('Current accout balance: $' + this.balance)
+                $('<h3/>').html('Current accout balance: $' + this.balance).css('text-align', 'center')
             );
             this.container.append(meds);
         }
@@ -323,17 +321,141 @@ $( document ).ready(function() {
         }
     }
 
+    class Toolbar {
+        constructor(){
+            this.container = $('#editor-toolbar');
+            this.tasks = [];
+            this.languages = [];
+            this.selected_task = undefined;
+            this.selected_language = undefined;
+            let self = this;
+            getJson(editor_urls['tasks'], (response) => {
+                console.log(response);
+                response.forEach((task) => {
+                    self.tasks.push({
+                        id: task.id,
+                        name: task.name,
+                        points: task.points,
+                        is_solved: task.is_solved
+                    });
+                });
+                self.selected_task = self.tasks[0];
+                $('#task-pdf').attr('src', editor_urls['assignment'].replace('4247', self.selected_task.id) + "?" + new Date().getTime());
+                self.render()
+            });
+            getJson(editor_urls['languages'], (response) => {
+                console.log(response);
+                response.forEach((language) => {
+                    self.languages.push({
+                        id: language.id,
+                        name: language.name
+                    });
+                });
+                self.selected_language = self.languages[0];
+                console.log(self.languages, self.selected_language);
+                self.render()
+            });
+        }
+
+        markTaskAsSolved(task_id){
+            this.tasks.forEach((task) => {
+                if (task.id === task_id){
+                    task.is_solved = true;
+                }
+            });
+            this.render();
+        }
+
+        changeTask(event){
+            this.tasks.forEach((task) => {
+               if (task.id == $(event.currentTarget).val()){
+                   this.selected_task = task;
+               }
+            });
+            $('#task-pdf').attr('src', editor_urls['assignment'].replace('4247', this.selected_task.id) + "?" + new Date().getTime());
+        }
+
+        changeLanguage(event){
+            console.log($(event.currentTarget));
+            console.log($(event.currentTarget).val());
+            this.languages.forEach((language) => {
+                if (language.id == $(event.currentTarget).val()){
+                    this.selected_language = language;
+                }
+            });
+            console.log(this.selected_language);
+        }
+
+        submit(){
+            console.log(this.selected_language);
+            let payload = {
+                code: editor.editor_window.getContent(),
+                language: this.selected_language.id,
+                task: this.selected_task.id
+            };
+            postJson(editor_urls['submit'], payload, (submit) => {
+                editor.submit_history.addSubmit(submit.id,  submit.status, submit.task_name);
+                this.submit_result_timer = setInterval(
+                    () => this.pollSubmitResult(submit.id),
+                    2000
+                );
+            })
+        }
+
+        pollSubmitResult(submit_id){
+            let base_url = editor_urls['submit_status'];
+            getJson(base_url.replace('4247', submit_id), (submit) => {
+                if (submit.status_code > 1){
+                    editor.submit_history.updateSubmitStatus(submit.id, submit.status);
+                    clearInterval(this.submit_result_timer);
+                    if (submit.status === 'OK'){
+                        this.markTaskAsSolved(submit.task_id)
+                    }
+                }
+            })
+        }
+
+        render() {
+            this.container.children().remove();
+            this.container.append(
+                $('<select/>').append(
+                    this.tasks.map((task) => {
+                        return $('<option/>').val(task.id).html((task.is_solved ? '&check;' : '') + task.name + ' (' + task.points + 'b)')
+                    })
+                ).change(this.changeTask.bind(this)).val(this.selected_task.id),
+                $('<button/>').html('Assignment').attr('data-toggle', 'modal').attr('data-target', '#assignment-modal').addClass('btn btn-info'),
+                $('<select/>').append(
+                    this.languages.map((language) => {
+                        return $('<option/>').val(language.id).html(language.name)
+                    })
+                ).change(this.changeLanguage.bind(this)).val(this.selected_language.id),
+                $('<button/>').addClass('btn btn-info').html('Quicksave').click(() => {
+                    localStorage.setItem('saved_code', editor.editor_window.getContent());
+                }),
+                $('<button/>').addClass('btn btn-info').html('Restore').click(() => {
+                    editor.editor_window.setContent(localStorage.getItem('saved_code'));
+                }),
+                $('<button/>').addClass('btn btn-danger').html('Submit').click(this.submit.bind(this))
+            )
+        }
+    }
+
     class SubmitHistory {
         constructor(){
             this.container = $('#submit-history');
-            this.submits = []
+            this.submits = [];
+            getJson(editor_urls['submit_list'], (data) => {
+                data.forEach((submit) => {
+                    this.addSubmit(submit.id, submit.status, submit.task_name)
+                });
+            });
         }
 
-        addSubmit(submit_id, task_name){
-            this.submits.push({
+        addSubmit(submit_id, status, task_name){
+            this.submits.unshift({
                 id: submit_id,
                 task_name: task_name,
-                status: 'Processing'
+                status: status
             });
             this.render()
         }
@@ -341,7 +463,7 @@ $( document ).ready(function() {
         updateSubmitStatus(id, status){
             this.submits.map((submit) => {
                 if (submit.id === id){
-                    submit.status = editor.rules.submit_statuses[status];
+                    submit.status = status;
                 }
                 return submit;
             });
@@ -352,8 +474,11 @@ $( document ).ready(function() {
             this.container.children().remove();
             this.container.append(
                 this.submits.map((submit) => {
-                    return $('<div/>').html('Submit ' + submit.id + ' for ' + submit.task_name + ': '+ submit.status)
-                        .addClass(submit.status === 2 ? 'submit-ok' : 'submit-wrong')
+                    return $('<div/>').addClass('row').append(
+                        $('<div/>').addClass('col-sm').html('Submit #' + submit.id),
+                        $('<div/>').addClass('col-sm').html(submit.status).addClass(submit.status === 'OK' ? 'submit-ok' : 'submit-wrong'),
+                        $('<div/>').addClass('col-sm').html(submit.task_name),
+                    );
                 })
             )
         }
@@ -362,71 +487,17 @@ $( document ).ready(function() {
     class Editor {
         constructor(){
             this.cursored_element = undefined;
-
-            this.updateRules();
-            setInterval(
-                () => this.updateRules(),
-                20000
-            );
-
             this.editor_window = new EditorWindow();
             let saved = localStorage.getItem('saved_code');
             if (!saved){
                 saved = 'Welcome to HellWorld!';
             }
+            this.saved_code = saved;
             this.editor_window.setContent(saved);
             this.submit_history = new SubmitHistory();
             this.medicine_panel = new MedicinePanel();
             this.disease_panel = new DiseasePanel();
-
-            $('#submit-button').click(this.submitCode.bind(this));
-            $('#quicksave-button').click(() => {
-                localStorage.setItem('saved_code', this.editor_window.getContent());
-            });
-            $('#restore-button').click(() => {
-                this.editor_window.setContent(localStorage.getItem('saved_code'));
-            });
-
-            $('#task-selector').change(this.changeTask);
-            this.changeTask();
-            this.saved_code = "";
-        }
-
-        changeTask(){
-            let val = $('#task-selector').val();
-                $('#task-pdf').attr(
-                    'src', editor_urls['assignment'].replace('4247', val) + "?" + new Date().getTime()
-            )
-        }
-
-        submitCode(){
-            let payload = {
-                code: this.editor_window.getContent(),
-                language: $('#language-selector').val(),
-                task: $('#task-selector').val()
-            };
-            postJson(editor_urls['submit'], payload, (response) => {
-                console.log(response);
-                this.submit_history.addSubmit(response.submit_id, response.task_name);
-                this.submit_result_timer = setInterval(
-                    () => this.pollSubmitResult(response.submit_id),
-                    2000
-                );
-            })
-        }
-
-        pollSubmitResult(submit_id){
-            let base_url = editor_urls['submit_status'];
-            getJson(base_url.replace('4247', submit_id), (response) => {
-                if (response.status > 1){
-                    this.submit_history.updateSubmitStatus(submit_id, response.status);
-                    clearInterval(this.submit_result_timer);
-                }
-            })
-        }
-
-        updateRules(){
-            getJson(editor_urls['rules'], (data) => {this.rules = data});
+            this.toolbar = new Toolbar();
         }
     }
 

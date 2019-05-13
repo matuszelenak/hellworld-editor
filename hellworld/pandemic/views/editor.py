@@ -7,53 +7,12 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView
 
-from pandemic.models import DiseaseTransmit, DiseaseInstance, MedicineEffect, MedicineClass, DiseaseClass
+from pandemic.models import DiseaseTransmit, DiseaseInstance, MedicineEffect, MedicineClass
 from people.models import Team, BluetoothTag, MedicineSupply
-from submit.models import Task, Submit
 
 
 class EditorView(TemplateView):
     template_name = "pandemic/editor.html"
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data.update(
-            {
-                'submit_cls': Submit,
-                'tasks': [
-                    {
-                        'name': task.name,
-                        'pk': task.pk,
-                        'points': task.max_points
-                    }
-                    for task in Task.objects.order_by('name')
-                ],
-                'balance': self.request.user.team.resources if self.request.user.team else 0
-            }
-        )
-        return data
-
-
-class CompetitionRules(View):
-    def get(self, request, *args, **kwargs):
-
-        data = {
-            'languages': {
-                k: v for v, k in Submit.LANGUAGE_CHOICES
-            },
-            'submit_statuses': {
-                k: v for k, v in Submit.STATUS_CHOICES
-            },
-            'diseases': [
-                {
-                    'name': x.name,
-                    'description': x.description
-                }
-                for x in DiseaseClass.objects.all()
-            ]
-        }
-
-        return JsonResponse(data)
 
 
 class PurchaseMedicine(View):

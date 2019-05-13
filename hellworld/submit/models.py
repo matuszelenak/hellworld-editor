@@ -33,7 +33,7 @@ class Submit(models.Model):
         (STATUS_COMPILATION_ERROR, 'Compilation error'),
         (STATUS_RUNTIME_EXCEPTION, 'Runtime exception'),
         (STATUS_TIME_LIMIT_EXCEEDED, 'Time limit exceeded'),
-        (STATUS_SCORING_FAILED, 'Scoring of the submit failed')
+        (STATUS_SCORING_FAILED, 'Scoring failed')
     )
 
     LANGUAGE_PYTHON = 0
