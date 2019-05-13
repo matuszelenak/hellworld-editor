@@ -81,7 +81,7 @@ class TaskListView(AuthorizedApiView):
                 'id': task.id,
                 'name': task.name,
                 'points': task.max_points,
-                'is_solved': Submit.objects.select_related('task').filter(status=Submit.STATUS_OK, participant=request.user).exists()
+                'is_solved': Submit.objects.select_related('task').filter(task=task, status=Submit.STATUS_OK, participant=request.user).exists()
             } for task in qs
         ], safe=False)
 
